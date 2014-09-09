@@ -1,0 +1,27 @@
+#+SETUPFILE: ../src/setup.org
+
+* thi.ng.color.test.core
+
+** Namespace declaration
+
+#+BEGIN_SRC clojure :tangle ../babel/test/cljx/thi/ng/color/test/core.cljx :mkdirp yes :padline no
+  (ns thi.ng.color.test.core
+    ,#+cljs
+    (:require-macros
+     [cemerick.cljs.test :refer [is deftest]])
+    (:require
+     [thi.ng.color.core :as col]
+     [thi.ng.common.math.core :refer [delta=]]
+     ,#+clj [clojure.test :refer :all]
+     ,#+cljs [cemerick.cljs.test :as t]))
+#+END_SRC
+
+** Tests
+
+#+BEGIN_SRC clojure :tangle ../babel/test/cljx/thi/ng/color/test/core.cljx
+  (deftest test-conversion
+    (is (delta= [0 1 1] (col/rgb->hsb 1 0 0)))
+    (is (delta= [0.3333333 1 1] (col/rgb->hsb 0 1 0)))
+    (is (delta= [0.6666666 1 1] (col/rgb->hsb 0 0 1)))
+    )
+#+END_SRC
