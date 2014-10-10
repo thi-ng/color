@@ -49,7 +49,7 @@ target/color-<<version>>.js
 #+END_SRC
 **** [[https://github.com/thi-ng/macromath][thi.ng/macromath]]
 #+BEGIN_SRC clojure :noweb-ref dep-mmath
-[thi.ng/macromath "0.2.3"]
+[thi.ng/macromath "0.3.0-SNAPSHOT"]
 #+END_SRC
 
 *** Development
@@ -59,7 +59,7 @@ target/color-<<version>>.js
 #+END_SRC
 **** [[https://github.com/lynaghk/cljx][Cljx]]
 #+BEGIN_SRC clojure :noweb-ref dep-cljx
-[com.keminglabs/cljx "0.4.0"]
+[org.clojars.cemerick/cljx "0.5.0-SNAPSHOT"]
 #+END_SRC
 **** [[https://github.com/hugoduncan/criterium][Criterium]]
 #+BEGIN_SRC clojure :noweb-ref dep-criterium
@@ -142,45 +142,51 @@ REPL via =(require 'thi.ng.color... :reload)= or similar.
     :description  "Cross-platform CLJ/CLJS library for color conversion & manipulation."
     :url          "<<project-url>>"
     :license      {:name "Apache Software License 2.0"
-                   :url "http://www.apache.org/licenses/LICENSE-2.0"}
+                   :url "http://www.apache.org/licenses/LICENSE-2.0"
+                   :distribution :repo}
     :scm          {:name "git"
                    :url  "https://github.com/thi-ng/color"}
+
+    :min-lein-version "2.4.0"
+
     :dependencies [<<dep-clj>>
                    <<dep-mmath>>]
 
     :source-paths ["src/cljx"]
     :test-paths   ["<<gen-test-path>>"]
 
-    :profiles {:dev {:dependencies [<<dep-cljs>>
-                                    <<dep-criterium>>]
-                     :plugins      [<<dep-cljx>>
-                                    <<dep-cljsbuild>>
-                                    <<dep-cljs-test>>
-                                    <<dep-austin>>]
-                     :hooks [cljx.hooks]
-                     :aliases {"cleantest" ["do" "clean," "test," "cljsbuild" "test"]}}}
+    :profiles     {:dev {:dependencies [<<dep-cljs>>
+                                        <<dep-criterium>>]
+                         :plugins      [<<dep-cljx>>
+                                        <<dep-cljsbuild>>
+                                        <<dep-cljs-test>>]
+                         :global-vars {*warn-on-reflection* true}
+                         :jvm-opts ^:replace []
+                         :auto-clean false
+                         :prep-tasks [["cljx" "once"] "javac" "compile"]
+                         :aliases {"cleantest" ["do" "clean" ["test" ":all"] ["cljsbuild" "test"]]}}}
 
-    :cljx {:builds [{:source-paths ["src/cljx"]
-                     :output-path "<<gen-source-path>>"
-                     :rules :clj}
-                    {:source-paths ["src/cljx"]
-                     :output-path "<<gen-source-path>>"
-                     :rules :cljs}
-                    {:source-paths ["test/cljx"]
-                     :output-path "<<gen-test-path>>"
-                     :rules :clj}
-                    {:source-paths ["test/cljx"]
-                     :output-path "<<gen-test-path>>"
-                     :rules :cljs}]}
+    :cljx         {:builds [{:source-paths ["src/cljx"]
+                             :output-path "<<gen-source-path>>"
+                             :rules :clj}
+                            {:source-paths ["src/cljx"]
+                             :output-path "<<gen-source-path>>"
+                             :rules :cljs}
+                            {:source-paths ["test/cljx"]
+                             :output-path "<<gen-test-path>>"
+                             :rules :clj}
+                            {:source-paths ["test/cljx"]
+                             :output-path "<<gen-test-path>>"
+                             :rules :cljs}]}
 
-    :cljsbuild {:builds [{:source-paths ["<<gen-source-path>>" "<<gen-test-path>>"]
-                          :id "simple"
-                          :compiler {:output-to "<<cljs-artefact-path>>"
-                                     :optimizations :whitespace
-                                     :pretty-print true}}]
-                :test-commands {"unit-tests" ["phantomjs" :runner "<<cljs-artefact-path>>"]}}
+    :cljsbuild    {:builds [{:source-paths ["<<gen-source-path>>" "<<gen-test-path>>"]
+                             :id "simple"
+                             :compiler {:output-to "<<cljs-artefact-path>>"
+                                        :optimizations :whitespace
+                                        :pretty-print true}}]
+                   :test-commands {"unit-tests" ["phantomjs" :runner "<<cljs-artefact-path>>"]}}
 
-    :pom-addition [:developers [:developer
+    :pom-addition [:developers [:developer {:id "toxi"}
                                 [:name "Karsten Schmidt"]
                                 [:url "http://postspectacular.com"]
                                 [:timezone "0"]]])
@@ -216,7 +222,7 @@ symbol =version= holding the version string defined above:
 #+BEGIN_SRC clojure :tangle ../babel/src/cljx/thi/ng/color/version.cljx :noweb yes :mkdirp yes :padline no :exports none
   (ns thi.ng.color.version)
 
-  (def ^:const version "<<version>>")
+  (def version "<<version>>")
 #+END_SRC
 
 * Modules
