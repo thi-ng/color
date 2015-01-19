@@ -2,7 +2,7 @@
 
 * Named preset colors
 
-** Complete namespace definition: thi.ng.common.color.presets
+** Complete namespace definition: thi.ng.color.presets
 
 This namespace defines a hashmap of 100+ preset colors as packed RGB
 ints and some convenience getters to return presets in different
