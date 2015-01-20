@@ -191,7 +191,7 @@ REPL via =(require 'thi.ng.color... :reload)= or similar.
 ** ClojureScript HTML harness                                      :noexport:
 
 #+BEGIN_SRC html :tangle ../babel/index.html :noweb yes :mkdirp yes :padline no
-  <!DOCTYPE html5>
+  <!DOCTYPE html>
   <html lang="en">
     <head>
       <title><<lein-coords>> test</title>
