@@ -174,7 +174,7 @@ downloads results as CSV file: [[http://dbpedia.org/sparql?default-graph-uri%3Dh
 
   (defn preset-rgb [id] (-> id colors col/int->rgba (subvec 0 3)))
 
-  (defn preset-hsb [id] (->> id preset-rgb (apply col/rgb->hsb)))
+  (defn preset-hsv [id] (->> id preset-rgb (apply col/rgb->hsv)))
 
   (defn preset-cmyk [id] (->> id preset-rgb (apply col/rgb->cmyk)))
 

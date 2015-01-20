@@ -15,10 +15,10 @@ ALPHA quality & under regular development
 
 This project is open source and licensed under the [[http://www.apache.org/licenses/LICENSE-2.0][Apache Software License 2.0]].
 
-** Injected properties                                             :noexport:
+** Injected properties
 
-#+BEGIN_SRC clojure :exports none :noweb-ref version
-0.1.0-SNAPSHOT
+#+BEGIN_SRC clojure :noweb-ref version
+0.1.0
 #+END_SRC
 #+BEGIN_SRC clojure :exports none :noweb-ref project-url
 http://thi.ng/color
@@ -45,11 +45,11 @@ target/color-<<version>>.js
 #+END_SRC
 **** [[https://github.com/thi-ng/common][thi.ng/common]]
 #+BEGIN_SRC clojure :noweb-ref dep-mmath
-[thi.ng/common "0.3.0-SNAPSHOT"]
+[thi.ng/common "0.3.0"]
 #+END_SRC
 **** [[https://github.com/thi-ng/macromath][thi.ng/macromath]]
 #+BEGIN_SRC clojure :noweb-ref dep-mmath
-[thi.ng/macromath "0.3.0-SNAPSHOT"]
+[thi.ng/macromath "0.3.0"]
 #+END_SRC
 
 *** Development
@@ -78,9 +78,9 @@ target/color-<<version>>.js
 
 ** Release history
 
-| *Version* | *Released* | *Description*      | *Tagged Github URL*              |
-|-----------+------------+--------------------+----------------------------------|
-|     0.1.0 | n/a        | 1st public release | https://github.com/thi-ng/color/ |
+| *Version* | *Released* | *Description*      | *Tagged Github URL* |
+|-----------+------------+--------------------+---------------------|
+|     0.1.0 | 2015-01-20 | 1st public release | [[https://github.com/thi-ng/color/tree/0.1.0][0.1.0]]               |
 
 ** Leiningen coordinates
 

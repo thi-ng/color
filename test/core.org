@@ -6,9 +6,9 @@
 
 #+BEGIN_SRC clojure :noweb-ref test
   (deftest test-conversion
-    (is (delta= [0 1 1] (col/rgb->hsb 1 0 0)))
-    (is (delta= [0.3333333 1 1] (col/rgb->hsb 0 1 0)))
-    (is (delta= [0.6666666 1 1] (col/rgb->hsb 0 0 1))))
+    (is (delta= [0 1 1] (col/rgb->hsv 1 0 0)))
+    (is (delta= [0.3333333 1 1] (col/rgb->hsv 0 1 0)))
+    (is (delta= [0.6666666 1 1] (col/rgb->hsv 0 0 1))))
 #+END_SRC
 
 ** Complete namespace declaration

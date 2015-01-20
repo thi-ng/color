@@ -11,7 +11,7 @@
 ** Color space & format conversion
 
 #+BEGIN_SRC clojure :noweb-ref conversion
-  (defn rgb->hsb
+  (defn rgb->hsv
     [r g b]
     (let [v (max r g b)
           d (- v (min r g b))
@@ -25,23 +25,23 @@
           h (/ h 6.0)]
       [(if (neg? h) (inc h) h) s v]))
 
-  (defn hsb->rgb
-    [h s b]
+  (defn hsv->rgb
+    [h s v]
     (if (m/delta= 0.0 s)
-      [b b b]
+      [v v v]
       (let [h (rem (* h 6.0) 6.0)
             i (int h)
             f (- h i)
-            p (* b (- 1.0 s))
-            q (* b (- 1.0 (* s f)))
-            t (* b (- 1.0 (mm/subm 1.0 f s)))]
+            p (* v (- 1.0 s))
+            q (* v (- 1.0 (* s f)))
+            t (* v (- 1.0 (mm/subm 1.0 f s)))]
         (case i
-          0 [b t p]
-          1 [q b p]
-          2 [p b t]
-          3 [p q b]
-          4 [t p b]
-          [b p q]))))
+          0 [v t p]
+          1 [q v p]
+          2 [p v t]
+          3 [p q v]
+          4 [t p v]
+          [v p q]))))
 
   (defn cmyk->rgb
     [c m y k]
@@ -86,11 +86,11 @@
             (str "rgba(" (int r) "," (int g) "," (int b) "," (max 0.0 a) ")"))
           (f/format fmt (rgba->int r g b))))))
 
-  (defn hsba->css
-    [h s b & [a]]
+  (defn hsva->css
+    [h s v & [a]]
     (if a
-      (apply rgba->css (conj (hsb->rgb h s b) a))
-      (apply rgba->css (hsb->rgb h s b))))
+      (apply rgba->css (conj (hsv->rgb h s v) a))
+      (apply rgba->css (hsv->rgb h s v))))
 
   (defn hex->rgba
     [hex]
@@ -120,7 +120,7 @@
          [nil 1e6] hues))))
 
   (defn hue-rgb
-    [rgb] (first (apply rgb->hsb rgb)))
+    [rgb] (first (apply rgb->hsv rgb)))
 
   (defn saturation-rgb
     [[r g b]]
@@ -134,32 +134,32 @@
   (defn luminance-rgb
     [[r g b]] (mm/madd 0.299 r 0.587 g 0.114 b))
 
-  (defn rotate-hue-hsb
-    "Returns new HSB color with its hue rotated by theta (in radians)."
-    [[h s b] theta]
+  (defn rotate-hue-hsv
+    "Returns new HSV color with its hue rotated by theta (in radians)."
+    [[h s v] theta]
     (let [h (+ h (/ (rem theta TWO_PI) TWO_PI))]
-      [(cond (neg? h) (inc h) (>= h 1.0) (dec h) :default h) s b]))
+      [(cond (neg? h) (inc h) (>= h 1.0) (dec h) :default h) s v]))
 
-  (defn adjust-saturation-hsb
-    [hsb x]
-    (update-in hsb [1] #(m/clamp (+ x %) 0.0 1.0)))
+  (defn adjust-saturation-hsv
+    [hsv x]
+    (update-in hsv [1] #(m/clamp (+ x %) 0.0 1.0)))
 
-  (defn adjust-saturation-hsb
-    [hsb x]
-    (update-in hsb [2] #(m/clamp (+ x %) 0.0 1.0)))
+  (defn adjust-saturation-hsv
+    [hsv x]
+    (update-in hsv [2] #(m/clamp (+ x %) 0.0 1.0)))
 
   (defn rotate-hue-rgb
-    [rgb theta] (apply hsb->rgb (rotate-hue-hsb (apply rgb->hsb rgb) theta)))
+    [rgb theta] (apply hsv->rgb (rotate-hue-hsv (apply rgb->hsv rgb) theta)))
 
   (defn adjust-saturation-rgb
     [rgb x]
-    (let [[h s b] (apply rgb->hsb rgb)]
-      (hsb->rgb h (m/clamp (+ x s) 0.0 1.0) b)))
+    (let [[h s v] (apply rgb->hsv rgb)]
+      (hsv->rgb h (m/clamp (+ x s) 0.0 1.0) v)))
 
   (defn adjust-brightness-rgb
     [rgb x]
-    (let [[h s b] (apply rgb->hsb rgb)]
-      (hsb->rgb h s (m/clamp (+ x b) 0.0 1.0))))
+    (let [[h s v] (apply rgb->hsv rgb)]
+      (hsv->rgb h s (m/clamp (+ x v) 0.0 1.0))))
 
   (defn adjust-alpha
     [col x]
@@ -169,9 +169,9 @@
 ** Color operations
 
 #+BEGIN_SRC clojure :noweb-ref ops
-  (defn complementary-hsb
-    "Returns new HSB color with its hue rotated by 180 degrees."
-    [hsb] (rotate-hue-hsb hsb PI))
+  (defn complementary-hsv
+    "Returns new HSV color with its hue rotated by 180 degrees."
+    [hsv] (rotate-hue-hsv hsv PI))
 
   (defn complementary-rgb
     [rgb] (rotate-hue-rgb rgb PI))
@@ -179,8 +179,8 @@
   (defn invert-rgb
     [[r g b]] [(- 1.0 r) (- 1.0 g) (- 1.0 b)])
 
-  (defn invert-hsb
-    [hsb] (apply rgb->hsb (invert-rgb (apply hsb->rgb hsb))))
+  (defn invert-hsv
+    [hsv] (apply rgb->hsv (invert-rgb (apply hsv->rgb hsv))))
 
   (defn dist-rgb
     [rgb1 rgb2]
@@ -189,14 +189,14 @@
           db (- (nth rgb1 2) (nth rgb2 2))]
       (Math/sqrt (mm/madd dr dr dg dg db db))))
 
-  (defn dist-hsb
-    [[ha sa ba] [hb sb bb]]
+  (defn dist-hsv
+    [[ha sa va] [hb sb vb]]
     (let [ha (* TWO_PI ha)
           hb (* TWO_PI hb)
           dh (- (* sa (Math/cos ha)) (* sb (Math/cos hb)))
           ds (- (* sa (Math/sin ha)) (* sb (Math/sin hb)))
-          db (- ba bb)]
-      (Math/sqrt (mm/madd dh dh ds ds db db))))
+          dv (- va vb)]
+      (Math/sqrt (mm/madd dh dh ds ds dv dv))))
 #+END_SRC
 
 *** Blending
@@ -208,18 +208,18 @@
      (mm/mix (nth rgb1 1) (nth rgb2 1) t)
      (mm/mix (nth rgb1 2) (nth rgb2 2) t)])
 
-  (defn blend-hsb
-    [hsb1 hsb2 t]
-    [(let [h1 (first hsb1)
-           h2 (first hsb2)
+  (defn blend-hsv
+    [hsv1 hsv2 t]
+    [(let [h1 (first hsv1)
+           h2 (first hsv2)
            hd (m/abs-diff h1 h2)]
        (if (> hd 0.5)
          (if (> h2 h1)
            (rem (mm/mix (inc h1) h2 t) 1.0)
            (rem (mm/mix h1 (inc h2) t) 1.0))
          (mm/mix h1 h2 t)))
-     (mm/mix (nth hsb1 1) (nth hsb2 1) t)
-     (mm/mix (nth hsb1 2) (nth hsb2 2) t)])
+     (mm/mix (nth hsv1 1) (nth hsv2 1) t)
+     (mm/mix (nth hsv1 2) (nth hsv2 2) t)])
 
   (defn blend-rgba
     [[dr dg db da] [sr sg sb sa]]
@@ -234,7 +234,8 @@
        a']))
 #+END_SRC
 
-** Complete namespace definition                                   :noexport:
+** Complete namespace definition
+
 #+BEGIN_SRC clojure :tangle ../babel/src/cljx/thi/ng/color/core.cljx :noweb yes :mkdirp yes :padline no
   (ns thi.ng.color.core
     ,#+cljs
