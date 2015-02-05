@@ -80,7 +80,7 @@
 
   (def int->hex
     (let [fmt ["#" (f/hex 6)]]
-      (fn [i] (f/format fmt (int i)))))
+      (fn [i] (f/format fmt (bit-and i 0xffffff)))))
 
   (def rgba->css
     (let [fmt ["#" (f/hex 6)]]
