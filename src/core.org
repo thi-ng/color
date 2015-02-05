@@ -78,6 +78,10 @@
      (* INV8BIT (bit-and int32 255))
      (* INV8BIT (bit-and (unsigned-bit-shift-right int32 24) 255))])
 
+  (def int->hex
+    (let [fmt ["#" (f/hex 6)]]
+      (fn [i] (f/format fmt (int i)))))
+
   (def rgba->css
     (let [fmt ["#" (f/hex 6)]]
       (fn [r g b & [a]]
