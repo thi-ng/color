@@ -18,7 +18,7 @@ This project is open source and licensed under the [[http://www.apache.org/licen
 ** Injected properties
 
 #+BEGIN_SRC clojure :noweb-ref version
-0.1.1-SNAPSHOT
+0.1.1
 #+END_SRC
 #+BEGIN_SRC clojure :exports none :noweb-ref project-url
 http://thi.ng/color
