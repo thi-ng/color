@@ -78,9 +78,10 @@ target/color-<<version>>.js
 
 ** Release history
 
-| *Version* | *Released* | *Description*      | *Tagged Github URL* |
-|-----------+------------+--------------------+---------------------|
-|     0.1.0 | 2015-01-20 | 1st public release | [[https://github.com/thi-ng/color/tree/0.1.0][0.1.0]]               |
+| *Version* | *Released* | *Description*                      | *Tagged Github URL* |
+|-----------+------------+------------------------------------+---------------------|
+|     0.1.1 | 2015-02-22 | updated presets, added conversions | [[https://github.com/thi-ng/color/tree/0.1.1][0.1.1]]               |
+|     0.1.0 | 2015-01-20 | 1st public release                 | [[https://github.com/thi-ng/color/tree/0.1.0][0.1.0]]               |
 
 ** Leiningen coordinates
 
