@@ -1,5 +1,11 @@
 #+SETUPFILE: setup.org
 
+* Contents                                                         :toc_3_gh:
+ - [[#named-preset-colors][Named preset colors]]
+     - [[#thingcolorpresets][thi.ng.color.presets]]
+     - [[#thingcolorcategories][thi.ng.color.categories]]
+     - [[#thingcolorpresetsbrewer][thi.ng.color.presets.brewer]]
+
 * Named preset colors
 
 ** thi.ng.color.presets

@@ -1,5 +1,14 @@
 #+SETUPFILE: setup.org
 
+* Contents                                                         :toc_3_gh:
+ - [[#namespace-thingcolorcore][Namespace: thi.ng.color.core]]
+     - [[#constants][Constants]]
+     - [[#color-space--format-conversion][Color space & format conversion]]
+     - [[#color-components][Color components]]
+     - [[#color-operations][Color operations]]
+         - [[#blending][Blending]]
+     - [[#complete-namespace-definition][Complete namespace definition]]
+
 * Namespace: thi.ng.color.core
 
 ** Constants
