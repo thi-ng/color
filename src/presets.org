@@ -14,7 +14,11 @@ Clojure naming conventions.
 
 Many more (900+) additional color presets can be sourced from
 [[http://dbpredia.org][DBpedia.org]]. Clicking this link executes the SPARQL query below and
-downloads results as CSV file: [[http://dbpedia.org/sparql?default-graph-uri%3Dhttp://dbpedia.org&query%3Dselect%20distinct%20?color%20?title%20?hex%20where%20{%20?color%20a%20<http://dbpedia.org/ontology/Colour>%20%3B%20<http://dbpedia.org/property/title>%20?title%20%3B%20<http://dbpedia.org/ontology/colourHexCode>%20?hex%20.%20}%0D%0A&format%3Dtext/csv][DBpedia query link]]
+downloads results as CSV file:
+
+#+BEGIN_SRC 
+  http://dbpedia.org/sparql?default-graph-uri%3Dhttp://dbpedia.org&query%3Dselect%20distinct%20?color%20?title%20?hex%20where%20{%20?color%20a%20<http://dbpedia.org/ontology/Colour>%20%3B%20<http://dbpedia.org/property/title>%20?title%20%3B%20<http://dbpedia.org/ontology/colourHexCode>%20?hex%20.%20}%0D%0A&format%3Dtext/csv
+#+END_SRC
 
 #+BEGIN_SRC sparql
   select distinct ?color ?title ?hex where {
