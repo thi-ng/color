@@ -108,7 +108,30 @@
   (defn hex->rgba
     [hex]
     (let [hex (if (= \# (first hex)) (subs hex 1) hex)]
-      (int->rgba (f/parse-int hex 16 0))))
+      (if (== 3 (count hex))
+        (let [[r g b] hex]
+          (int->rgba (f/parse-int (str r r g g b b) 16 0)))
+        (int->rgba (f/parse-int hex 16 0)))))
+
+  (defn- parse-channel-val
+    [^String c]
+    (if (pos? (.indexOf c "%"))
+      (* 0.01 (f/parse-float (subs c 0 (dec (count c)))))
+      (* INV8BIT (f/parse-int c 10 0))))
+
+  (defn css->rgba
+    [css]
+    (if (= \# (first css))
+      (hex->rgba css)
+      (let [[[_ mode a b c d :as col]] (re-seq #"(rgb|hsl)a?\((\d+%?),(\d+%?),(\d+%?),?([0-9\.]+)?\)" css)]
+        (prn col)
+        (if mode
+          (if (#{"rgb" "rgba"} mode)
+            (conj (mapv parse-channel-val [a b c]) (f/parse-float d 1.0))
+            (let [h (/ (f/parse-float a) 360.0)
+                  s (parse-channel-val b)
+                  v (parse-channel-val c)]
+              (conj (hsv->rgb h s v) (f/parse-float d 1.0))))))))
 #+END_SRC
 
 ** Color components
@@ -116,7 +139,7 @@
 #+BEGIN_SRC clojure :noweb-ref components
   (def hues
     (zipmap
-     [:red :orange :yellow :lime :green :teal :cyan :azure :blue :indigo :purple :magenta]
+     [:red :orange :yellow :lime :green :teal :cyan :azure :blue :purple :magenta]
      (map #(/ % 360.0) (range 0 360 30))))
 
   (def primary-hues
@@ -128,7 +151,7 @@
        (first
         (reduce
          (fn [[h' d'] [k v]]
-           (let [d (min (m/abs-diff h v) (m/abs-diff (inc h) v))]
+           (let [d (min (m/abs-diff h v) (m/abs-diff (dec h) v))]
              (if (< d d') [k d] [h' d'])))
          [nil 1e6] hues))))
 
