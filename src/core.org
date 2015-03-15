@@ -107,11 +107,14 @@
 
   (defn hex->rgba
     [hex]
-    (let [hex (if (= \# (first hex)) (subs hex 1) hex)]
-      (if (== 3 (count hex))
-        (let [[r g b] hex]
-          (int->rgba (f/parse-int (str r r g g b b) 16 0)))
-        (int->rgba (f/parse-int hex 16 0)))))
+    (let [hex (if (= \# (first hex)) (subs hex 1) hex)
+          rgba (if (== 3 (count hex))
+                 (let [[r g b] hex]
+                   (int->rgba (f/parse-int (str r r g g b b) 16 0)))
+                 (int->rgba (f/parse-int hex 16 0)))]
+      (if (and rgba (< (count hex) 7))
+        (assoc rgba 3 1.0)
+        rgba)))
 
   (defn- parse-channel-val
     [^String c]
@@ -124,7 +127,6 @@
     (if (= \# (first css))
       (hex->rgba css)
       (let [[[_ mode a b c d :as col]] (re-seq #"(rgb|hsl)a?\((\d+%?),(\d+%?),(\d+%?),?([0-9\.]+)?\)" css)]
-        (prn col)
         (if mode
           (if (#{"rgb" "rgba"} mode)
             (conj (mapv parse-channel-val [a b c]) (f/parse-float d 1.0))

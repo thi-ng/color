@@ -11,6 +11,17 @@
     (is (delta= [0.6666666 1 1] (col/rgb->hsv 0 0 1))))
 #+END_SRC
 
+#+BEGIN_SRC clojure :noweb-ref test
+  (deftest test-css-parse
+    (is (delta= [1 0.8 0.2 1] (col/css->rgba "#fc3")))
+    (is (delta= [1 0.8 0.2 1] (col/css->rgba "#ffcc33")))
+    (is (delta= [1 0.8 0.2 1] (col/css->rgba "rgb(255,204,51)")))
+    (is (delta= [1 0.8 0.2 0.25] (col/css->rgba "rgba(255,204,51,0.25)")))
+    (is (delta= [1 0.8 0.2 0.25] (col/css->rgba "rgba(100%,80%,20%,0.25)")))
+    (is (delta= [0 0.5 0.5 1] (col/css->rgba "hsl(180,100%,50%)")))
+    (is (delta= [0 0.5 0.5 0.25] (col/css->rgba "hsla(180,100%,50%,0.25)"))))
+#+END_SRC
+
 ** Complete namespace declaration
 
 #+BEGIN_SRC clojure :tangle ../babel/test/cljx/thi/ng/color/test/core.cljx :noweb yes :mkdirp yes :padline no
