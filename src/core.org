@@ -182,7 +182,7 @@
     [hsv x]
     (update-in hsv [1] #(m/clamp (+ x %) 0.0 1.0)))
 
-  (defn adjust-saturation-hsv
+  (defn adjust-brightness-hsv
     [hsv x]
     (update-in hsv [2] #(m/clamp (+ x %) 0.0 1.0)))
 
