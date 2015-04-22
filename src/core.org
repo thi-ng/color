@@ -20,10 +20,13 @@
 ** Color space & format conversion
 
 #+BEGIN_SRC clojure :noweb-ref conversion
+  (defn with-alpha
+    [col a] (if a (conj col a) col))
+
   (defn rgb->hsv
     ([rgb]
      (apply rgb->hsv rgb))
-    ([r g b]
+    ([r g b & [a]]
      (let [v (max r g b)
            d (- v (min r g b))
            s (if (zero? v) 0.0 (/ d v))
@@ -34,12 +37,13 @@
                  g (+ 2.0 (mm/subdiv b r d))
                  (+ 4.0 (mm/subdiv r g d))))
            h (/ h 6.0)]
-       [(if (neg? h) (inc h) h) s v])))
+       (with-alpha
+         [(if (neg? h) (inc h) h) s v] a))))
 
   (defn hsv->rgb
     ([hsv]
      (apply hsv->rgb hsv))
-    ([h s v]
+    ([h s v & [a]]
      (if (m/delta= 0.0 s)
        [v v v]
        (let [h (rem (* h 6.0) 6.0)
@@ -48,34 +52,40 @@
              p (* v (- 1.0 s))
              q (* v (- 1.0 (* s f)))
              t (* v (- 1.0 (mm/subm 1.0 f s)))]
-         (case i
-           0 [v t p]
-           1 [q v p]
-           2 [p v t]
-           3 [p q v]
-           4 [t p v]
-           [v p q])))))
+         (with-alpha
+           (case i
+             0 [v t p]
+             1 [q v p]
+             2 [p v t]
+             3 [p q v]
+             4 [t p v]
+             [v p q])
+           a)))))
 
   (defn cmyk->rgb
     ([cmyk]
      (apply cmyk->rgb cmyk))
-    ([c m y k]
-     [(- 1.0 (min 1.0 (+ c k)))
-      (- 1.0 (min 1.0 (+ m k)))
-      (- 1.0 (min 1.0 (+ y k)))]))
+    ([c m y k & [a]]
+     (with-alpha
+       [(- 1.0 (min 1.0 (+ c k)))
+        (- 1.0 (min 1.0 (+ m k)))
+        (- 1.0 (min 1.0 (+ y k)))]
+       a)))
 
   (defn rgb->cmyk
     ([rgb]
      (apply rgb->cmyk rgb))
-    ([r g b]
+    ([r g b & [a]]
      (let [c (- 1.0 r)
            m (- 1.0 g)
            y (- 1.0 b)
            k (min (min c m) y)]
-       [(max (- c k) 0.0)
-        (max (- m k) 0.0)
-        (max (- y k) 0.0)
-        (max k 0.0)])))
+       (with-alpha
+         [(max (- c k) 0.0)
+          (max (- m k) 0.0)
+          (max (- y k) 0.0)
+          (max k 0.0)]
+         a))))
 
   (defn rgba->int
     ([rgba]
@@ -164,7 +174,15 @@
 
   (def brightness #(nth % 2))
 
-  (def alpha #(nth % 3 1))
+  (def cyan first)
+
+  (def magenta #(nth % 1))
+
+  (def yellow #(nth % 2))
+
+  (def black #(nth % 3))
+
+  (def alpha #(nth % (if (== 4 (count %)) 3 4) 1))
 
   (def hues
     (zipmap
