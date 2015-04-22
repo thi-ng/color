@@ -18,7 +18,7 @@ This project is open source and licensed under the [[http://www.apache.org/licen
 ** Injected properties                                             :noexport:
 
 #+BEGIN_SRC clojure :noweb-ref version
-0.2.0
+0.1.3
 #+END_SRC
 
 #+BEGIN_SRC clojure :exports none :noweb-ref project-url
