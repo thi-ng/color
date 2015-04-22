@@ -7,5 +7,5 @@ Please see [index.org](src/index.org) for further information.
 ## Current Leiningen coordinates
 
 ```clj
-[thi.ng/color "0.1.2"]
+[thi.ng/color "0.2.0"]
 ```

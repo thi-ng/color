@@ -15,20 +15,24 @@ ALPHA quality & under regular development
 
 This project is open source and licensed under the [[http://www.apache.org/licenses/LICENSE-2.0][Apache Software License 2.0]].
 
-** Injected properties
+** Injected properties                                             :noexport:
 
 #+BEGIN_SRC clojure :noweb-ref version
-0.1.2
+0.2.0
 #+END_SRC
+
 #+BEGIN_SRC clojure :exports none :noweb-ref project-url
 http://thi.ng/color
 #+END_SRC
+
 #+BEGIN_SRC clojure :exports none :noweb-ref gen-source-path
 target/classes
 #+END_SRC
+
 #+BEGIN_SRC clojure :exports none :noweb-ref gen-test-path
 target/test-classes
 #+END_SRC
+
 #+BEGIN_SRC clojure :exports none :noweb yes :noweb-ref cljs-artefact-path
 target/color-<<version>>.js
 #+END_SRC
@@ -41,7 +45,7 @@ target/color-<<version>>.js
 #+END_SRC
 **** [[https://github.com/clojure/clojurescript][ClojureScript]]
 #+BEGIN_SRC clojure :noweb-ref dep-cljs
-[org.clojure/clojurescript "0.0-2913"]
+[org.clojure/clojurescript "0.0-3165"]
 #+END_SRC
 **** [[https://github.com/thi-ng/common][thi.ng/common]]
 #+BEGIN_SRC clojure :noweb-ref dep-mmath
@@ -55,7 +59,7 @@ target/color-<<version>>.js
 *** Development
 **** [[https://github.com/lynaghk/cljx][Cljx]]
 #+BEGIN_SRC clojure :noweb-ref dep-cljx
-[com.keminglabs/cljx "0.5.0"]
+[com.keminglabs/cljx "0.6.0"]
 #+END_SRC
 **** [[https://github.com/hugoduncan/criterium][Criterium]]
 #+BEGIN_SRC clojure :noweb-ref dep-criterium
@@ -67,7 +71,7 @@ target/color-<<version>>.js
 #+END_SRC
 **** [[https://github.com/emezeske/lein-cljsbuild][Cljsbuild]]
 #+BEGIN_SRC clojure :noweb-ref dep-cljsbuild
-[lein-cljsbuild "1.0.4"]
+[lein-cljsbuild "1.0.5"]
 #+END_SRC
 
 ** Contributors

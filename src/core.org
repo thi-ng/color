@@ -14,71 +14,81 @@
 ** Constants
 
 #+BEGIN_SRC clojure :noweb-ref const
-  (def ^:const INV8BIT (/ 1.0 255))
+  (def INV8BIT (/ 1.0 255))
 #+END_SRC
 
 ** Color space & format conversion
 
 #+BEGIN_SRC clojure :noweb-ref conversion
   (defn rgb->hsv
-    [r g b]
-    (let [v (max r g b)
-          d (- v (min r g b))
-          s (if (zero? v) 0.0 (/ d v))
-          h (if (zero? s)
-              0.0
-              (condp == v
-                r (mm/subdiv g b d)
-                g (+ 2.0 (mm/subdiv b r d))
-                (+ 4.0 (mm/subdiv r g d))))
-          h (/ h 6.0)]
-      [(if (neg? h) (inc h) h) s v]))
+    ([rgb]
+     (apply rgb->hsv rgb))
+    ([r g b]
+     (let [v (max r g b)
+           d (- v (min r g b))
+           s (if (zero? v) 0.0 (/ d v))
+           h (if (zero? s)
+               0.0
+               (condp == v
+                 r (mm/subdiv g b d)
+                 g (+ 2.0 (mm/subdiv b r d))
+                 (+ 4.0 (mm/subdiv r g d))))
+           h (/ h 6.0)]
+       [(if (neg? h) (inc h) h) s v])))
 
   (defn hsv->rgb
-    [h s v]
-    (if (m/delta= 0.0 s)
-      [v v v]
-      (let [h (rem (* h 6.0) 6.0)
-            i (int h)
-            f (- h i)
-            p (* v (- 1.0 s))
-            q (* v (- 1.0 (* s f)))
-            t (* v (- 1.0 (mm/subm 1.0 f s)))]
-        (case i
-          0 [v t p]
-          1 [q v p]
-          2 [p v t]
-          3 [p q v]
-          4 [t p v]
-          [v p q]))))
+    ([hsv]
+     (apply hsv->rgb hsv))
+    ([h s v]
+     (if (m/delta= 0.0 s)
+       [v v v]
+       (let [h (rem (* h 6.0) 6.0)
+             i (int h)
+             f (- h i)
+             p (* v (- 1.0 s))
+             q (* v (- 1.0 (* s f)))
+             t (* v (- 1.0 (mm/subm 1.0 f s)))]
+         (case i
+           0 [v t p]
+           1 [q v p]
+           2 [p v t]
+           3 [p q v]
+           4 [t p v]
+           [v p q])))))
 
   (defn cmyk->rgb
-    [c m y k]
-    [(- 1.0 (min 1.0 (+ c k)))
-     (- 1.0 (min 1.0 (+ m k)))
-     (- 1.0 (min 1.0 (+ y k)))])
+    ([cmyk]
+     (apply cmyk->rgb cmyk))
+    ([c m y k]
+     [(- 1.0 (min 1.0 (+ c k)))
+      (- 1.0 (min 1.0 (+ m k)))
+      (- 1.0 (min 1.0 (+ y k)))]))
 
   (defn rgb->cmyk
-    [r g b]
-    (let [c (- 1.0 r)
-          m (- 1.0 g)
-          y (- 1.0 b)
-          k (min (min c m) y)]
-      [(max (- c k) 0.0)
-       (max (- m k) 0.0)
-       (max (- y k) 0.0)
-       (max k 0.0)]))
+    ([rgb]
+     (apply rgb->cmyk rgb))
+    ([r g b]
+     (let [c (- 1.0 r)
+           m (- 1.0 g)
+           y (- 1.0 b)
+           k (min (min c m) y)]
+       [(max (- c k) 0.0)
+        (max (- m k) 0.0)
+        (max (- y k) 0.0)
+        (max k 0.0)])))
 
   (defn rgba->int
-    [r g b & [a]]
-    (let [rgb (bit-or
-               (bit-or
-                (-> r (* 255) int (bit-shift-left 16))
-                (-> g (* 255) int (bit-shift-left 8)))
-               (-> b (* 255) int))]
-      (if a
-        (bit-or rgb (-> a (* 255) int (bit-shift-left 24)))
-        rgb)))
+    ([rgba]
+     (apply rgba->int rgba))
+    ([r g b & [a]]
+     (let [rgb (bit-or
+                (bit-or
+                 (-> r (* 255) int (bit-shift-left 16))
+                 (-> g (* 255) int (bit-shift-left 8)))
+                (-> b (* 255) int))]
+       (if a
+         (bit-or rgb (-> a (* 255) int (bit-shift-left 24)))
+         rgb))))
 
   (defn int->rgba
     [int32]
@@ -87,23 +97,26 @@
      (* INV8BIT (bit-and int32 255))
      (* INV8BIT (bit-and (unsigned-bit-shift-right int32 24) 255))])
 
-  (def int->hex
-    (let [fmt ["#" (f/hex 6)]]
-      (fn [i] (f/format fmt (bit-and i 0xffffff)))))
+  (def ^:private hex6 ["#" (f/hex 6)])
 
-  (def rgba->css
-    (let [fmt ["#" (f/hex 6)]]
-      (fn [r g b & [a]]
-        (if (and a (< a 1.0))
-          (let [r (* 255 r) g (* 255 g) b (* 255 b)]
-            (str "rgba(" (int r) "," (int g) "," (int b) "," (max 0.0 a) ")"))
-          (f/format fmt (rgba->int r g b))))))
+  (defn int->hex
+    [i] (f/format hex6 (bit-and i 0xffffff)))
+
+  (defn rgba->css
+    ([rgba] (apply rgba->css rgba))
+    ([r g b & [a]]
+     (if (and a (< a 1.0))
+       (let [r (* 255 r) g (* 255 g) b (* 255 b)]
+         (str "rgba(" (int r) "," (int g) "," (int b) "," (max 0.0 a) ")"))
+       (f/format hex6 (rgba->int r g b)))))
 
   (defn hsva->css
-    [h s v & [a]]
-    (if a
-      (apply rgba->css (conj (hsv->rgb h s v) a))
-      (apply rgba->css (hsv->rgb h s v))))
+    ([hsva]
+     (apply hsva->css hsva))
+    ([h s v & [a]]
+     (if a
+       (apply rgba->css (conj (hsv->rgb h s v) a))
+       (apply rgba->css (hsv->rgb h s v)))))
 
   (defn hex->rgba
     [hex]
@@ -139,6 +152,20 @@
 ** Color components
 
 #+BEGIN_SRC clojure :noweb-ref components
+  (def red first)
+
+  (def green #(nth % 1))
+
+  (def blue #(nth % 2))
+
+  (def hue first)
+
+  (def saturation #(nth % 1))
+
+  (def brightness #(nth % 2))
+
+  (def alpha #(nth % 3 1))
+
   (def hues
     (zipmap
      [:red :orange :yellow :lime :green :teal :cyan :azure :blue :purple :magenta]
@@ -202,6 +229,11 @@
   (defn adjust-alpha
     [col x]
     (update-in col [3] #(m/clamp (+ x (or % 1)) 0.0 1.0)))
+
+  (defn gamma-rgba
+    [[r g b & [a]] e]
+    (let [rgb' (mapv #(Math/pow % e) [r g b])]
+      (if a (conj rgb' a) rgb')))
 #+END_SRC
 
 ** Color operations
@@ -218,7 +250,7 @@
     [[r g b]] [(- 1.0 r) (- 1.0 g) (- 1.0 b)])
 
   (defn invert-hsv
-    [hsv] (apply rgb->hsv (invert-rgb (apply hsv->rgb hsv))))
+    [hsv] (->> hsv (apply hsv->rgb) (invert-rgb) (apply rgb->hsv)))
 
   (defn dist-rgb
     [rgb1 rgb2]
