@@ -6,10 +6,26 @@
 ** Overview
 
 Cross-platform CLJ/CLJS library for color conversion & manipulation.
+The library supports the following color spaces: RGB, HSV, CMYK,
+CIE1931. In addition conversion to/from CSS colors is supported.
+
+The current set of color operations includes:
+
+- rotation
+- brightness/saturation adjustments
+- complementary/inverse colors
+- hue matching
+- blending (with & without alpha)
+- distance calculations
+
+The library includes a namespace of the 100+ CSS named color presets
+as well as D3's & Cynthia Brewer's categorical color schemes
+originally intented for geo mapping applications. See
+[[./presets.org][thi.ng.color.presets]] for more details.
 
 ** Status
 
-ALPHA quality & under regular development
+STABLE & under regular development
 
 ** License
 
@@ -18,7 +34,7 @@ This project is open source and licensed under the [[http://www.apache.org/licen
 ** Injected properties                                             :noexport:
 
 #+BEGIN_SRC clojure :noweb-ref version
-0.1.3
+0.1.4
 #+END_SRC
 
 #+BEGIN_SRC clojure :exports none :noweb-ref project-url
@@ -45,7 +61,7 @@ target/color-<<version>>.js
 #+END_SRC
 **** [[https://github.com/clojure/clojurescript][ClojureScript]]
 #+BEGIN_SRC clojure :noweb-ref dep-cljs
-[org.clojure/clojurescript "0.0-3165"]
+[org.clojure/clojurescript "0.0-3211"]
 #+END_SRC
 **** [[https://github.com/thi-ng/common][thi.ng/common]]
 #+BEGIN_SRC clojure :noweb-ref dep-mmath
@@ -82,10 +98,13 @@ target/color-<<version>>.js
 
 ** Release history
 
-| *Version* | *Released* | *Description*                      | *Tagged Github URL* |
-|-----------+------------+------------------------------------+---------------------|
-|     0.1.1 | 2015-02-22 | updated presets, added conversions | [[https://github.com/thi-ng/color/tree/0.1.1][0.1.1]]               |
-|     0.1.0 | 2015-01-20 | 1st public release                 | [[https://github.com/thi-ng/color/tree/0.1.0][0.1.0]]               |
+| *Version* |    *Released* | *Description*                            | *Tagged Github URL* |
+|-----------+---------------+------------------------------------------+---------------------|
+|     0.1.4 | /in planning/ | CIE1931 color space support, doc updates |                     |
+|     0.1.3 |    2015-04-22 | bugfixes, conversion updates             | [[https://github.com/thi-ng/color/tree/0.1.3][0.1.3]]               |
+|     0.1.2 |    2015-03-15 | bugfixes                                 | [[https://github.com/thi-ng/color/tree/0.1.2][0.1.2]]               |
+|     0.1.1 |    2015-02-22 | updated presets, added conversions       | [[https://github.com/thi-ng/color/tree/0.1.1][0.1.1]]               |
+|     0.1.0 |    2015-01-20 | 1st public release                       | [[https://github.com/thi-ng/color/tree/0.1.0][0.1.0]]               |
 
 ** Leiningen coordinates
 
