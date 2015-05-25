@@ -339,15 +339,15 @@
 
 ** Complete namespace definition
 
-#+BEGIN_SRC clojure :tangle ../babel/src/cljx/thi/ng/color/core.cljx :noweb yes :mkdirp yes :padline no
+#+BEGIN_SRC clojure :tangle ../babel/src/thi/ng/color/core.cljc :noweb yes :mkdirp yes :padline no
   (ns thi.ng.color.core
-    ,#+cljs
+    #?(:cljs
     (:require-macros
-     [thi.ng.macromath.core :as mm])
+     [thi.ng.math.macros :as mm]))
     (:require
-     [thi.ng.common.math.core :as m :refer [PI TWO_PI]]
-     [thi.ng.common.stringformat :as f]
-     ,#+clj [thi.ng.macromath.core :as mm]))
+     [thi.ng.math.core :as m :refer [PI TWO_PI]]
+     [thi.ng.strf.core :as f]
+     #?(:clj [thi.ng.math.macros :as mm])))
 
   <<const>>
 

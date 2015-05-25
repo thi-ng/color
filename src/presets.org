@@ -34,11 +34,11 @@ downloads results as CSV file:
   }
 #+END_SRC
 
-#+BEGIN_SRC clojure :tangle ../babel/src/cljx/thi/ng/color/presets.cljx :mkdirp yes :padline no
+#+BEGIN_SRC clojure :tangle ../babel/src/thi/ng/color/presets.cljc :mkdirp yes :padline no
   (ns thi.ng.color.presets
     (:require
      [thi.ng.color.core :as col]
-     [thi.ng.common.stringformat :as f]))
+     [thi.ng.strf.core :as f]))
 
   (def colors
     {:alice-blue 0xf0f8ff
@@ -188,14 +188,14 @@ downloads results as CSV file:
 
   (defn preset-cmyk [id] (->> id preset-rgb (apply col/rgb->cmyk)))
 
-  (defn preset-css [id] (->> id colors ((f/hex 6)) (str "#")))
+  (defn preset-css [id] (->> id colors col/int->hex))
 #+END_SRC
 
 ** thi.ng.color.categories
 
 D3 categorical color schemes https://github.com/mbostock/d3/wiki/Ordinal-Scales#categorical-colors
 
-#+BEGIN_SRC clojure :noweb-ref :tangle ../babel/src/cljx/thi/ng/color/presets/categories.cljx :mkdirp yes :padline no
+#+BEGIN_SRC clojure :noweb-ref :tangle ../babel/src/thi/ng/color/presets/categories.cljc :mkdirp yes :padline no
   (ns thi.ng.color.presets.categories
     (:require
      [thi.ng.color.core :as col]))
@@ -230,11 +230,10 @@ Brewer]]. Unlike in their original JS distribution, here the schemes are
 defined in a more compressed version and can be retrieved in different
 formats via the =brewer-scheme-*= functions defined below.
 
-#+BEGIN_SRC clojure :tangle ../babel/src/cljx/thi/ng/color/presets/brewer.cljx :mkdirp yes :padline no
+#+BEGIN_SRC clojure :tangle ../babel/src/thi/ng/color/presets/brewer.cljc :mkdirp yes :padline no
   (ns thi.ng.color.presets.brewer
     (:require
-     [thi.ng.color.core :as col]
-     [thi.ng.common.stringformat :as f]))
+     [thi.ng.color.core :as col]))
 
   (def ^:private uniques
     [0x9e0142 0xd53e4f 0xf46d43 0xfdae61 0xfee08b 0xffffbf 0xe6f598 0xabdda4

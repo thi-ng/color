@@ -34,19 +34,11 @@ This project is open source and licensed under the [[http://www.apache.org/licen
 ** Injected properties                                             :noexport:
 
 #+BEGIN_SRC clojure :noweb-ref version
-0.1.4
+0.2.0
 #+END_SRC
 
 #+BEGIN_SRC clojure :exports none :noweb-ref project-url
 http://thi.ng/color
-#+END_SRC
-
-#+BEGIN_SRC clojure :exports none :noweb-ref gen-source-path
-target/classes
-#+END_SRC
-
-#+BEGIN_SRC clojure :exports none :noweb-ref gen-test-path
-target/test-classes
 #+END_SRC
 
 #+BEGIN_SRC clojure :exports none :noweb yes :noweb-ref cljs-artefact-path
@@ -57,26 +49,21 @@ target/color-<<version>>.js
 *** Runtime
 **** [[https://github.com/clojure/clojure][Clojure]]
 #+BEGIN_SRC clojure :noweb-ref dep-clj
-[org.clojure/clojure "1.6.0"]
+[org.clojure/clojure "1.7.0-beta3"]
 #+END_SRC
 **** [[https://github.com/clojure/clojurescript][ClojureScript]]
 #+BEGIN_SRC clojure :noweb-ref dep-cljs
-[org.clojure/clojurescript "0.0-3211"]
+[org.clojure/clojurescript "0.0-3291"]
 #+END_SRC
-**** [[https://github.com/thi-ng/common][thi.ng/common]]
-#+BEGIN_SRC clojure :noweb-ref dep-mmath
-[thi.ng/common "0.3.1"]
+**** [[https://github.com/thi-ng/math][thi.ng/math]]
+#+BEGIN_SRC clojure :noweb-ref dep-math
+[thi.ng/math "0.1.0"]
 #+END_SRC
-**** [[https://github.com/thi-ng/macromath][thi.ng/macromath]]
-#+BEGIN_SRC clojure :noweb-ref dep-mmath
-[thi.ng/macromath "0.3.0"]
+**** [[https://github.com/thi-ng/strf][thi.ng/strf]]
+#+BEGIN_SRC clojure :noweb-ref dep-math
+[thi.ng/strf "0.1.0"]
 #+END_SRC
-
 *** Development
-**** [[https://github.com/lynaghk/cljx][Cljx]]
-#+BEGIN_SRC clojure :noweb-ref dep-cljx
-[com.keminglabs/cljx "0.6.0"]
-#+END_SRC
 **** [[https://github.com/hugoduncan/criterium][Criterium]]
 #+BEGIN_SRC clojure :noweb-ref dep-criterium
 [criterium "0.4.3"]
@@ -87,7 +74,7 @@ target/color-<<version>>.js
 #+END_SRC
 **** [[https://github.com/emezeske/lein-cljsbuild][Cljsbuild]]
 #+BEGIN_SRC clojure :noweb-ref dep-cljsbuild
-[lein-cljsbuild "1.0.5"]
+[lein-cljsbuild "1.0.6"]
 #+END_SRC
 
 ** Contributors
@@ -98,13 +85,13 @@ target/color-<<version>>.js
 
 ** Release history
 
-| *Version* |    *Released* | *Description*                            | *Tagged Github URL* |
-|-----------+---------------+------------------------------------------+---------------------|
-|     0.1.4 | /in planning/ | CIE1931 color space support, doc updates |                     |
-|     0.1.3 |    2015-04-22 | bugfixes, conversion updates             | [[https://github.com/thi-ng/color/tree/0.1.3][0.1.3]]               |
-|     0.1.2 |    2015-03-15 | bugfixes                                 | [[https://github.com/thi-ng/color/tree/0.1.2][0.1.2]]               |
-|     0.1.1 |    2015-02-22 | updated presets, added conversions       | [[https://github.com/thi-ng/color/tree/0.1.1][0.1.1]]               |
-|     0.1.0 |    2015-01-20 | 1st public release                       | [[https://github.com/thi-ng/color/tree/0.1.0][0.1.0]]               |
+| *Version* | *Released* | *Description*                                          | *Tagged Github URL* |
+|-----------+------------+--------------------------------------------------------+---------------------|
+|     0.2.0 | 2015-05-26 | no more CLJX, CIE1931 color space support, doc updates | [[https://github.com/thi-ng/color/tree/0.2.0][0.2.0]]               |
+|     0.1.3 | 2015-04-22 | bugfixes, conversion updates                           | [[https://github.com/thi-ng/color/tree/0.1.3][0.1.3]]               |
+|     0.1.2 | 2015-03-15 | bugfixes                                               | [[https://github.com/thi-ng/color/tree/0.1.2][0.1.2]]               |
+|     0.1.1 | 2015-02-22 | updated presets, added conversions                     | [[https://github.com/thi-ng/color/tree/0.1.1][0.1.1]]               |
+|     0.1.0 | 2015-01-20 | 1st public release                                     | [[https://github.com/thi-ng/color/tree/0.1.0][0.1.0]]               |
 
 ** Leiningen coordinates
 
@@ -115,13 +102,13 @@ target/color-<<version>>.js
 ** Building this project
 
 This project is written in a literate programming format and requires
-[[https://www.gnu.org/software/emacs/][Emacs]] & [[http://orgmode.org][Org-mode]] to generate usable source code in [[https://github.com/lynaghk/cljx][CLJX]] form. Assuming
-both tools are installed, the easiest way to generate a working
-project is via command line (make sure =emacs= is on your path or else
-edit its path in =tangle.sh=):
+[[https://www.gnu.org/software/emacs/][Emacs]] & [[http://orgmode.org][Org-mode]] to generate usable source code. Assuming both tools
+are installed, the easiest way to generate a working project is via
+command line (make sure =emacs= is on your path or else edit its path
+in =tangle.sh=):
 
 #+BEGIN_SRC bash
-  git clone https://github.com/thi-ng/color.git
+  git clone https://github.com/thi.ng/color.git
   cd color
   ./tangle.sh src/*.org test/*.org
 #+END_SRC
@@ -148,12 +135,11 @@ further experimentation in the browser.
 
 *** Working with the REPL
 
-Since the generated =project.clj= (see below) includes REPL hooks for
-CLJX, editing files in Org-mode, then re-loading & testing changes is
-quite trivial. Simply launch a REPL (via =lein= or Emacs) as usual.
-Everytime you've made changes to an =.org= file, re-tangle it from
-Emacs (=C-c C-v t=) or =tangle.sh=, then reload the namespace in the
-REPL via =(require 'thi.ng.color... :reload)= or similar.
+Editing code blocks or files in Org-mode, then re-loading & testing
+changes is quite trivial. Simply launch a REPL (via =lein= or Emacs)
+as usual. Everytime you've made changes to an =.org= file, re-tangle
+it from Emacs (=C-c C-v t=) or =tangle.sh=, then reload the namespace
+in the REPL via =(require 'thi.ng.color... :reload)= or similar.
 
 ** Leiningen project file                                          :noexport:
 
@@ -170,36 +156,18 @@ REPL via =(require 'thi.ng.color... :reload)= or similar.
     :min-lein-version "2.4.0"
 
     :dependencies [<<dep-clj>>
-                   <<dep-mmath>>]
+                   <<dep-cljs>>
+                   <<dep-math>>
+                   <<dep-strf>>]
 
-    :source-paths ["src/cljx"]
-    :test-paths   ["<<gen-test-path>>"]
-
-    :profiles     {:dev {:dependencies [<<dep-cljs>>
-                                        <<dep-criterium>>]
-                         :plugins      [<<dep-cljx>>
-                                        <<dep-cljsbuild>>
+    :profiles     {:dev {:dependencies [<<dep-criterium>>]
+                         :plugins      [<<dep-cljsbuild>>
                                         <<dep-cljs-test>>]
                          :global-vars {*warn-on-reflection* true}
                          :jvm-opts ^:replace []
-                         :auto-clean false
-                         :prep-tasks [["cljx" "once"]]
-                         :aliases {"cleantest" ["do" "clean," "cljx" "once," "test," "cljsbuild" "test"]}}}
+                         :aliases {"cleantest" ["do" "clean," "test," "cljsbuild" "test"]}}}
 
-    :cljx         {:builds [{:source-paths ["src/cljx"]
-                             :output-path "<<gen-source-path>>"
-                             :rules :clj}
-                            {:source-paths ["src/cljx"]
-                             :output-path "<<gen-source-path>>"
-                             :rules :cljs}
-                            {:source-paths ["test/cljx"]
-                             :output-path "<<gen-test-path>>"
-                             :rules :clj}
-                            {:source-paths ["test/cljx"]
-                             :output-path "<<gen-test-path>>"
-                             :rules :cljs}]}
-
-    :cljsbuild    {:builds [{:source-paths ["<<gen-source-path>>" "<<gen-test-path>>"]
+    :cljsbuild    {:builds [{:source-paths ["src" "test"]
                              :id "simple"
                              :compiler {:output-to "<<cljs-artefact-path>>"
                                         :optimizations :whitespace
@@ -239,7 +207,7 @@ symbol =version= holding the version string defined above:
 
 *** Version namespace                                              :noexport:
 
-#+BEGIN_SRC clojure :tangle ../babel/src/cljx/thi/ng/color/version.cljx :noweb yes :mkdirp yes :padline no :exports none
+#+BEGIN_SRC clojure :tangle ../babel/src/thi/ng/color/version.cljc :noweb yes :mkdirp yes :padline no :exports none
   (ns thi.ng.color.version)
 
   (def version "<<version>>")

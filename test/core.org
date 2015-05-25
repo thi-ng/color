@@ -56,13 +56,15 @@
 
 ** Complete namespace declaration
 
-#+BEGIN_SRC clojure :tangle ../babel/test/cljx/thi/ng/color/test/core.cljx :noweb yes :mkdirp yes :padline no
+#+BEGIN_SRC clojure :tangle ../babel/test/thi/ng/color/test/core.cljc :noweb yes :mkdirp yes :padline no
   (ns thi.ng.color.test.core
     (:require
      [thi.ng.color.core :as col]
-     [thi.ng.common.math.core :refer [delta=]]
-     ,#+clj [clojure.test :refer :all]
-     ,#+cljs [cemerick.cljs.test :refer-macros [is deftest with-test testing]]))
+     [thi.ng.math.core :refer [delta=]]
+     #?(:clj
+        [clojure.test :refer :all]
+        :cljs
+        [cemerick.cljs.test :refer-macros [is deftest with-test testing]])))
 
   <<test>>
 #+END_SRC
