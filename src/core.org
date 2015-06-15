@@ -2,20 +2,14 @@
 
 * Contents                                                         :toc_3_gh:
  - [[#namespace-thingcolorcore][Namespace: thi.ng.color.core]]
-     - [[#constants][Constants]]
      - [[#color-space--format-conversion][Color space & format conversion]]
      - [[#color-components][Color components]]
      - [[#color-operations][Color operations]]
          - [[#blending][Blending]]
+     - [[#constants][Constants]]
      - [[#complete-namespace-definition][Complete namespace definition]]
 
 * Namespace: thi.ng.color.core
-
-** Constants
-
-#+BEGIN_SRC clojure :noweb-ref const
-  (def INV8BIT (/ 1.0 255))
-#+END_SRC
 
 ** Color space & format conversion
 
@@ -26,7 +20,7 @@
   (defn rgb->hsv
     ([rgb]
      (apply rgb->hsv rgb))
-    ([r g b & [a]]
+    ([r g b]
      (let [v (max r g b)
            d (- v (min r g b))
            s (if (zero? v) 0.0 (/ d v))
@@ -37,13 +31,14 @@
                  g (+ 2.0 (mm/subdiv b r d))
                  (+ 4.0 (mm/subdiv r g d))))
            h (/ h 6.0)]
-       (with-alpha
-         [(if (neg? h) (inc h) h) s v] a))))
+       [(if (neg? h) (inc h) h) s v]))
+    ([r g b a]
+     (conj (rgb->hsv r g b) a)))
 
   (defn hsv->rgb
     ([hsv]
      (apply hsv->rgb hsv))
-    ([h s v & [a]]
+    ([h s v]
      (if (m/delta= 0.0 s)
        [v v v]
        (let [h (rem (* h 6.0) 6.0)
@@ -52,40 +47,40 @@
              p (* v (- 1.0 s))
              q (* v (- 1.0 (* s f)))
              t (* v (- 1.0 (mm/subm 1.0 f s)))]
-         (with-alpha
-           (case i
-             0 [v t p]
-             1 [q v p]
-             2 [p v t]
-             3 [p q v]
-             4 [t p v]
-             [v p q])
-           a)))))
+         (case i
+           0 [v t p]
+           1 [q v p]
+           2 [p v t]
+           3 [p q v]
+           4 [t p v]
+           [v p q]))))
+    ([h s v a]
+     (conj (hsv->rgb h s v) a)))
 
   (defn cmyk->rgb
     ([cmyk]
      (apply cmyk->rgb cmyk))
-    ([c m y k & [a]]
-     (with-alpha
-       [(- 1.0 (min 1.0 (+ c k)))
-        (- 1.0 (min 1.0 (+ m k)))
-        (- 1.0 (min 1.0 (+ y k)))]
-       a)))
+    ([c m y k]
+     [(- 1.0 (min 1.0 (+ c k)))
+      (- 1.0 (min 1.0 (+ m k)))
+      (- 1.0 (min 1.0 (+ y k)))])
+    ([c m y k a]
+     (conj (cmyk->rgb c m y k) a)))
 
   (defn rgb->cmyk
     ([rgb]
      (apply rgb->cmyk rgb))
-    ([r g b & [a]]
+    ([r g b]
      (let [c (- 1.0 r)
            m (- 1.0 g)
            y (- 1.0 b)
            k (min (min c m) y)]
-       (with-alpha
-         [(max (- c k) 0.0)
-          (max (- m k) 0.0)
-          (max (- y k) 0.0)
-          (max k 0.0)]
-         a))))
+       [(max (- c k) 0.0)
+        (max (- m k) 0.0)
+        (max (- y k) 0.0)
+        (max k 0.0)]))
+    ([r g b a]
+     (conj (rgb->cmyk r g b) a)))
 
   (defn- cie1931-gamma-correct
     [x]
@@ -96,24 +91,26 @@
   (defn cie1931->rgb
     ([xyz]
      (apply cie1931->rgb xyz))
-    ([x y z & [a]]
-     (let [r (mm/madd 3.2406 x -1.5372 y -0.4986 z)
-           g (mm/madd -0.9689 x 1.8758 y 0.0415 z)
-           b (mm/madd 0.0557 x -0.2040 y 1.0570 z)]
-       (with-alpha (mapv cie1931-gamma-correct [r g b]) a))))
+    ([x y z]
+     (mapv
+      cie1931-gamma-correct
+      [(mm/madd 3.2406 x -1.5372 y -0.4986 z)
+       (mm/madd -0.9689 x 1.8758 y 0.0415 z)
+       (mm/madd 0.0557 x -0.2040 y 1.0570 z)]))
+    ([x y z a]
+     (conj (cie1931->rgb x y z) a)))
 
   (defn rgba->int
     ([rgba]
      (apply rgba->int rgba))
-    ([r g b & [a]]
-     (let [rgb (bit-or
-                (bit-or
-                 (-> r (* 255) int (bit-shift-left 16))
-                 (-> g (* 255) int (bit-shift-left 8)))
-                (-> b (* 255) int))]
-       (if a
-         (bit-or rgb (-> a (* 255) int (bit-shift-left 24)))
-         rgb))))
+    ([r g b]
+     (bit-or
+      (bit-or
+       (-> r (* 255) int (bit-shift-left 16))
+       (-> g (* 255) int (bit-shift-left 8)))
+      (-> b (* 255) int)))
+    ([r g b a]
+     (bit-or (rgba->int r g b) (bit-shift-left (int (* a 255)) 24))))
 
   (defn int->rgba
     [int32]
@@ -129,8 +126,10 @@
 
   (defn rgba->css
     ([rgba] (apply rgba->css rgba))
-    ([r g b & [a]]
-     (if (and a (< a 1.0))
+    ([r g b]
+     (f/format hex6 (rgba->int r g b)))
+    ([r g b a]
+     (if (< a 1.0)
        (let [r (* 255 r) g (* 255 g) b (* 255 b)]
          (str "rgba(" (int r) "," (int g) "," (int b) "," (max 0.0 a) ")"))
        (f/format hex6 (rgba->int r g b)))))
@@ -138,10 +137,10 @@
   (defn hsva->css
     ([hsva]
      (apply hsva->css hsva))
-    ([h s v & [a]]
-     (if a
-       (apply rgba->css (conj (hsv->rgb h s v) a))
-       (apply rgba->css (hsv->rgb h s v)))))
+    ([h s v]
+     (apply rgba->css (hsv->rgb h s v)))
+    ([h s v a]
+     (apply rgba->css (conj (hsv->rgb h s v) a))))
 
   (defn hex->rgba
     [hex]
@@ -335,6 +334,12 @@
        (* ia' (mm/madd sg sa dg da'))
        (* ia' (mm/madd sb sa db da'))
        a']))
+#+END_SRC
+
+** Constants
+
+#+BEGIN_SRC clojure :noweb-ref const
+  (def INV8BIT (/ 1.0 255))
 #+END_SRC
 
 ** Complete namespace definition
