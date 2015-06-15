@@ -99,7 +99,10 @@ This following snippet is *not* part of the library and only used to
 create the above preset visualizations. Requires http://thi.ng/geom to
 be added to your REPL/project in order to run...
 
-#+BEGIN_SRC clojure :tangle ../babel/dev/scheme-previews.clj :mkdirp yes :padline no
+When tangling this file, the code below will be saved in the
+=/babel/dev/= subdir of this project...
+
+#+BEGIN_SRC clojure :tangle ../babel/dev/cosine-previews.clj :mkdirp yes :padline no
   (require '[thi.ng.color.gradients :as grad])
   (require '[thi.ng.geom.viz.core :as viz])
   (require '[thi.ng.geom.svg.core :as svg])
