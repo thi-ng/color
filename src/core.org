@@ -13,6 +13,9 @@
 
 ** Color space & format conversion
 
+- https://github.com/flixel-gdx/flixel-gdx/blob/master/flixel-core/src/org/flixel/data/shaders/blend/luminosity.glsl
+- http://www.chilliant.com/rgb2hsv.html
+
 #+BEGIN_SRC clojure :noweb-ref conversion
   (defn with-alpha
     [col a] (if a (conj col a) col))
@@ -56,6 +59,53 @@
            [v p q]))))
     ([h s v a]
      (conj (hsv->rgb h s v) a)))
+
+  (defn rgb->hsl
+    ([rgb]
+     (apply rgb->hsl rgb))
+    ([r g b]
+     (let [f1 (min r g b)
+           f2 (max r g b)
+           l  (mm/addm f1 f2 0.5)
+           d  (- f2 f1)]
+       (if (zero? d)
+         [0.0 0.0 l]
+         (let [s  (if (< l 0.5) (/ d (+ f1 f2)) (/ d (- (- 2.0 f2) f1)))
+               d2 (* 0.5 d)
+               dr (mm/adddiv (mm/subm f2 r SIXTH) d2 d)
+               dg (mm/adddiv (mm/subm f2 g SIXTH) d2 d)
+               db (mm/adddiv (mm/subm f2 b SIXTH) d2 d)
+               h  (condp == f2
+                    r (- db dg)
+                    g (- (+ THIRD dr) db)
+                    (- (+ TWO_THIRD dg) dr))
+               h  (if (neg? h) (inc h) (if (>= h 1.0) (dec h) h))]
+           [h s l]))))
+    ([r g b a]
+     (conj (rgb->hsl r g b) a)))
+
+  (defn hue->rgb
+    [f1 f2 h]
+    (let [h (if (neg? h) (inc h) (if (>= h 1.0) (dec h) h))]
+      (cond
+        (< h SIXTH)     (m/mix f1 f2 (* 6.0 h))
+        (< h 0.5)       f2
+        (< h TWO_THIRD) (m/mix f1 f2 (mm/subm TWO_THIRD h 6.0))
+        :else           f1)))
+
+  (defn hsl->rgb
+    ([hsla]
+     (apply hsl->rgb hsla))
+    ([h s l]
+     (if (zero? s)
+       [l l l]
+       (let [f2 (if (< l 0.5) (* l (inc s)) (- (+ l s) (* l s)))
+             f1 (- (* 2.0 l) f2)]
+         [(hue->rgb f1 f2 (+ h THIRD))
+          (hue->rgb f1 f2 h)
+          (hue->rgb f1 f2 (- h THIRD))])))
+    ([h s l a]
+     (conj (hsl->rgb h s l) a)))
 
   (defn cmyk->rgb
     ([cmyk]
@@ -142,6 +192,16 @@
     ([h s v a]
      (apply rgba->css (conj (hsv->rgb h s v) a))))
 
+  (defn hsla->css
+    ([hsla]
+     (apply hsla->css hsla))
+    ([h s l]
+     (let [h (int (* h 360)) s (int (* s 100)) l (int (* l 100))]
+       (str "hsl(" h "," s "," l ")")))
+    ([h s l a]
+     (let [h (int (* h 360)) s (int (* s 100)) l (int (* l 100))]
+       (str "hsla(" h "," s "%," l "%," a ")"))))
+
   (defn hex->rgba
     [hex]
     (let [hex (if (= \# (first hex)) (subs hex 1) hex)
@@ -169,8 +229,8 @@
             (conj (mapv parse-channel-val [a b c]) (f/parse-float d 1.0))
             (let [h (/ (f/parse-float a) 360.0)
                   s (parse-channel-val b)
-                  v (parse-channel-val c)]
-              (conj (hsv->rgb h s v) (f/parse-float d 1.0))))))))
+                  l (parse-channel-val c)]
+              (conj (hsl->rgb h s l) (f/parse-float d 1.0))))))))
 #+END_SRC
 
 ** Color components
@@ -339,6 +399,9 @@
 ** Constants
 
 #+BEGIN_SRC clojure :noweb-ref const
+  (def THIRD (/ 1.0 3))
+  (def TWO_THIRD (/ 2.0 3))
+  (def SIXTH (/ 1.0 6))
   (def INV8BIT (/ 1.0 255))
 #+END_SRC
 
