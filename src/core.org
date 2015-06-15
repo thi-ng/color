@@ -13,8 +13,8 @@
 
 ** Color space & format conversion
 
-- https://github.com/flixel-gdx/flixel-gdx/blob/master/flixel-core/src/org/flixel/data/shaders/blend/luminosity.glsl
-- http://www.chilliant.com/rgb2hsv.html
+- [[https://github.com/flixel-gdx/flixel-gdx/blob/master/flixel-core/src/org/flixel/data/shaders/blend/luminosity.glsl][flixel-gdx]]
+- [[http://www.chilliant.com/rgb2hsv.html][chilliant.com]]
 
 #+BEGIN_SRC clojure :noweb-ref conversion
   (defn with-alpha
@@ -84,7 +84,7 @@
     ([r g b a]
      (conj (rgb->hsl r g b) a)))
 
-  (defn hue->rgb
+  (defn- hsl-hue->rgb
     [f1 f2 h]
     (let [h (if (neg? h) (inc h) (if (>= h 1.0) (dec h) h))]
       (cond
@@ -101,11 +101,57 @@
        [l l l]
        (let [f2 (if (< l 0.5) (* l (inc s)) (- (+ l s) (* l s)))
              f1 (- (* 2.0 l) f2)]
-         [(hue->rgb f1 f2 (+ h THIRD))
-          (hue->rgb f1 f2 h)
-          (hue->rgb f1 f2 (- h THIRD))])))
+         [(hsl-hue->rgb f1 f2 (+ h THIRD))
+          (hsl-hue->rgb f1 f2 h)
+          (hsl-hue->rgb f1 f2 (- h THIRD))])))
     ([h s l a]
      (conj (hsl->rgb h s l) a)))
+
+  (defn hue->rgb
+    [h]
+    (let [h (* 6.0 h)]
+      [(m/clamp (dec (m/abs (- h 3.0))) 0.0 1.0)
+       (m/clamp (- 2.0 (m/abs (- h 2.0))) 0.0 1.0)
+       (m/clamp (- 2.0 (m/abs (- h 4.0))) 0.0 1.0)]))
+
+  (defn rgb->hcv
+    ([rgba]
+     (apply rgb->hcv rgba))
+    ([r g b]
+     (let [[px py pz pw] (if (< g b) [b g -1.0 TWO_THIRD] [g b 0.0 (- THIRD)])
+           [qx qy qz qw] (if (< r px) [px py pw r] [r py pz px])
+           c (- qx (min qw qy))
+           h (m/abs (+ (/ (- qw qy) (mm/madd 6.0 c 1e-10)) qz))]
+       [h c qx]))
+    ([r g b a]
+     (conj (rgb->hcv r g b) a)))
+
+  (defn rgb->hcy
+    ([rgba]
+     (apply rgb->hcy rgba))
+    ([r g b]
+     (let [[h c v] (rgb->hcv r g b)
+           y (mm/madd 0.299 r 0.587 g 0.114 b)]
+       (if (zero? c)
+         [h c y]
+         (let [[r' g' b'] (hue->rgb h)
+               z (mm/madd 0.299 r' 0.587 g' 0.114 b')]
+           (if (> (- y z) 1e-5)
+             [h (* c (mm/subdiv 1.0 z 1.0 y)) y]
+             [h (* c (/ z y)) y])))))
+    ([r g b a]
+     (conj (rgb->hcy r g b) a)))
+
+  (defn hcy->rgb
+    ([hcya]
+     (apply hcy->rgb hcya))
+    ([h c y]
+     (let [[r g b] (hue->rgb h)
+           z (mm/madd 0.299 r 0.587 g 0.114 b)
+           c' (if (< y z) (* c (/ y z)) (if (< z 1.0) (* c (mm/subdiv 1.0 y 1.0 z)) c))]
+       [(mm/submadd r z c' y) (mm/submadd g z c' y) (mm/submadd b z c' y)]))
+    ([h c y a]
+     (conj (hcy->rgb h c y) a)))
 
   (defn cmyk->rgb
     ([cmyk]
@@ -247,6 +293,8 @@
   (def saturation #(nth % 1))
 
   (def brightness #(nth % 2))
+
+  (def lightness #(nth % 2))
 
   (def cyan first)
 
