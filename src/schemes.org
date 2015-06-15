@@ -2,22 +2,26 @@
 
 * Contents                                                         :toc_3_gh:
  - [[#namespace-thingcolorschemes][Namespace: thi.ng.color.schemes]]
-     - [[#cosine-based-rgb-palette-generation][Cosine based RGB palette generation]]
+     - [[#cosine-based-gradient-generation][Cosine based gradient generation]]
          - [[#presets][Presets]]
          - [[#implementation][Implementation]]
+         - [[#example-usage][Example usage]]
          - [[#gradient-presets-visualization][Gradient presets visualization]]
      - [[#complete-namespace-definition][Complete namespace definition]]
 
 * Namespace: thi.ng.color.schemes
 
-** Cosine based RGB palette generation
+** Cosine based gradient generation
 
-Based on method by iq (Inigo Quilez): http://v.gd/B2aySt
+Based on method by iq (Iñigo Quílez): http://v.gd/B2aySt
 
 *** Presets
 
+Here we define a number of RGB gradient presets, primarily useful for
+data visualization purposes:
+
 #+BEGIN_SRC clojure :noweb-ref generators
-  (def gradient-scheme-presets
+  (def gradient-schemes
     {:rainbow1 [[0.5 0.5 0.5] [0.5 0.5 0.5] [1.0 1.0 1.0] [0 0.3333 0.6666]]
      :rainbow2 [[0.5 0.5 0.5] [0.666 0.666 0.666] [1.0 1.0 1.0] [0 0.3333 0.6666]]
      :rainbow3 [[0.5 0.5 0.5] [0.75 0.75 0.75] [1.0 1.0 1.0] [0 0.3333 0.6666]]
@@ -31,6 +35,9 @@ Based on method by iq (Inigo Quilez): http://v.gd/B2aySt
      :blue-cyan [[0.0 0.5 0.5] [0 0.5 0.5] [0.0 0.45 0.3333] [0.0 0.5 0.6666]]
      :red-blue [[0.5 0 0.5] [0.5 0 0.5] [0.5 0 0.5] [0 0 0.5]]})
 #+END_SRC
+
+Diagrams of the presets showing their channel curves and resulting
+gradients (using 100 samples):
 
 | [[http://media.thi.ng/color/presets/rainbow1.svg]]            | [[http://media.thi.ng/color/presets/rainbow2.svg]]    |
 | :rainbow1                                                 | :rainbow2                                         |
@@ -47,6 +54,15 @@ Based on method by iq (Inigo Quilez): http://v.gd/B2aySt
 
 *** Implementation
 
+The two functions below implement the gradient generation function:
+=cosine-gradient-color= to compute single colors and
+=cosine-gradient-scheme= to create a vector of n tuples covering the
+full gradient range.
+
+*Note:* These function are not restricted to RGB colors and can be
+used in many other contexts - think of it as an ND waveform
+generator...
+
 #+BEGIN_SRC clojure :noweb-ref generators
   (defn cosine-gradient-color
     [offset amp fmod phase t]
@@ -54,7 +70,7 @@ Based on method by iq (Inigo Quilez): http://v.gd/B2aySt
      (fn [a b c d] (m/clamp (+ a (* b (Math/cos (* TWO_PI (+ (* c t) d))))) 0 1))
      offset amp fmod phase))
 
-  (defn cosine-gradient-scheme
+  (defn cosine-gradient
     "Takes a length n and 4 cosine coefficients (for colors usually
     3-element vectors) and produces vector of n new vectors, with each
     of its elements defined by an AM & FM cosine wave and clamped to
@@ -63,29 +79,49 @@ Based on method by iq (Inigo Quilez): http://v.gd/B2aySt
     (mapv (partial cosine-gradient-color offset amp fmod phase) (m/norm-range (dec n))))
 #+END_SRC
 
+*** Example usage
+
+#+BEGIN_SRC clojure
+  ;; using a preset
+  (def my-grad
+    (->> :red-blue
+         (schemes/gradient-schemes)
+         (apply schemes/cosine-gradient 100)))
+
+  ;; specifying cosine coefficients directly
+  (def my-grad
+    (schemes/cosine-gradient 100 [0.5 0 0.5] [0.5 0 0.5] [0.5 0 0.5] [0 0 0.5]))
+#+END_SRC
+
 *** Gradient presets visualization
 
 This following snippet is *not* part of the library and only used to
 create the above preset visualizations. Requires http://thi.ng/geom to
 be added to your REPL/project in order to run...
 
-#+BEGIN_SRC clojure :tangle ../babel/examples/scheme-previews.clj
+#+BEGIN_SRC clojure :tangle ../babel/dev/scheme-previews.clj :mkdirp yes :padline no
+  (require '[thi.ng.color.schemes :as schemes])
   (require '[thi.ng.geom.viz.core :as viz])
   (require '[thi.ng.geom.svg.core :as svg])
   (require '[thi.ng.math.core :as m])
-  (require '[thi.ng.color.schemes :as schemes])
 
   (defn channel-specs
     [colors]
     (map-indexed
      (fn [idx col]
-       {:values  (map (fn [i c] [i (nth c idx)]) (m/norm-range (dec (count colors))) colors)
+       {:values  (viz/->uniform-domain-points [0 1] (map #(nth % idx) colors))
         :attribs {:fill "none" :stroke col}
         :layout  viz/svg-line-plot})
      ["red" "green" "blue"]))
 
-  (doseq [[id coeffs] schemes/gradient-scheme-presets]
-    (let [colors (apply schemes/cosine-gradient-scheme 100 coeffs)]
+  (defn color-bars
+    [x1 x2 y w h colors]
+    (let [n (dec (count colors))]
+      (for [i (m/norm-range n)]
+        (svg/rect [(m/mix x1 x2 i) y] w h {:fill (colors (int (* i n)))}))))
+
+  (doseq [[id coeffs] schemes/gradient-schemes]
+    (let [colors (apply schemes/cosine-gradient 100 coeffs)]
       (->> {:x-axis (viz/linear-axis
                      {:domain [0 1] :range [50 580] :major 0.5 :minor 0.125 :pos 250})
             :y-axis (viz/linear-axis
@@ -96,8 +132,7 @@ be added to your REPL/project in order to run...
            (viz/svg-plot2d-cartesian)
            (svg/svg
             {:width 600 :height 300}
-            (for [i (m/norm-range 99)]
-              (svg/rect [(m/mix 50 570 i) 280] 10 20 {:fill (colors (int (* i 99)))})))
+            (color-bars 50 570 280 10 20 colors))
            (svg/serialize)
            (spit (str (name id) ".svg")))))
 #+END_SRC
