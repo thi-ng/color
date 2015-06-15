@@ -1,9 +1,18 @@
 # thi.ng/color
 
-Cross-platform CLJ/CLJS library for color conversion & manipulation
-(RGB/RGBA/HSV/CYMK/CIE1931). Also includes a namespace of color
-presets (incl. CSS named colors, D3 & Brewer categorical color
-schemes).
+![Procedural gradient example](http://media.thi.ng/color/presets/rainbow1.svg)
+
+Cross-platform CLJ/CLJS library for color conversion & manipulation,
+gradient generators and color presets (incl. CSS named colors, D3 &
+Brewer categorical color schemes).
+
+Supported color space conversions (all with optional alpha channel):
+
+- RGB to HSV, HSL, HCY, HCV, CIE1931, CMYK, CSS, int32
+- HSV to RGB, CSS
+- HSL to RGB, CSS
+- HCY to RGB
+- CYMK to RGB
 
 *Note:* This library relies on the new conditional reader syntax of
  recent Clojure & Clojurescript versions and therefore is **not
