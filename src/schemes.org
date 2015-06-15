@@ -1,0 +1,118 @@
+#+SETUPFILE: setup.org
+
+* Contents                                                         :toc_3_gh:
+ - [[#namespace-thingcolorschemes][Namespace: thi.ng.color.schemes]]
+     - [[#cosine-based-rgb-palette-generation][Cosine based RGB palette generation]]
+         - [[#presets][Presets]]
+         - [[#implementation][Implementation]]
+         - [[#gradient-presets-visualization][Gradient presets visualization]]
+     - [[#complete-namespace-definition][Complete namespace definition]]
+
+* Namespace: thi.ng.color.schemes
+
+** Cosine based RGB palette generation
+
+Based on method by iq (Inigo Quilez): http://v.gd/B2aySt
+
+*** Presets
+
+#+BEGIN_SRC clojure :noweb-ref generators
+  (def gradient-scheme-presets
+    {:rainbow1 [[0.5 0.5 0.5] [0.5 0.5 0.5] [1.0 1.0 1.0] [0 0.3333 0.6666]]
+     :rainbow2 [[0.5 0.5 0.5] [0.666 0.666 0.666] [1.0 1.0 1.0] [0 0.3333 0.6666]]
+     :rainbow3 [[0.5 0.5 0.5] [0.75 0.75 0.75] [1.0 1.0 1.0] [0 0.3333 0.6666]]
+     :rainbow4 [[0.5 0.5 0.5] [1 1 1] [1.0 1.0 1.0] [0 0.3333 0.6666]]
+     :yellow-magenta-cyan [[1 0.5 0.5] [0.5 0.5 0.5] [0.75 1.0 0.6666] [0.8 1.0 0.4]]
+     :orange-blue [[0.5 0.5 0.5] [0.5 0.5 0.5] [0.8 0.8 0.5] [0 0.2 0.5]]
+     :green-magenta [[0.6666 0.5 0.5] [0.5 0.6666 0.5] [0.6666 0.666 0.5] [0.25 0.0 0.5]]
+     :green-red [[0.5 0.5 0] [0.5 0.5 0] [0.5 0.5 0] [0.5 0.0 0]]
+     :green-cyan [[0.0 0.5 0.5] [0 0.5 0.5] [0.0 0.3333 0.5] [0.0 0.6666 0.5]]
+     :yellow-red [[0.5 0.5 0] [0.5 0.5 0] [0.1 0.5 0] [0.0 0.0 0]]
+     :blue-cyan [[0.0 0.5 0.5] [0 0.5 0.5] [0.0 0.45 0.3333] [0.0 0.5 0.6666]]
+     :red-blue [[0.5 0 0.5] [0.5 0 0.5] [0.5 0 0.5] [0 0 0.5]]})
+#+END_SRC
+
+| [[http://media.thi.ng/color/presets/rainbow1.svg]]            | [[http://media.thi.ng/color/presets/rainbow2.svg]]    |
+| :rainbow1                                                 | :rainbow2                                         |
+| [[http://media.thi.ng/color/presets/rainbow3.svg]]            | [[http://media.thi.ng/color/presets/rainbow4.svg]]    |
+| :rainbow3                                                 | :rainbow4                                         |
+| [[http://media.thi.ng/color/presets/yellow-magenta-cyan.svg]] | [[http://media.thi.ng/color/presets/orange-blue.svg]] |
+| :yellow-magenta-cyan preset                               | :orange-blue                                      |
+| [[http://media.thi.ng/color/presets/green-magenta.svg]]       | [[http://media.thi.ng/color/presets/green-red.svg]]   |
+| :green-magenta                                            | :green-red                                        |
+| [[http://media.thi.ng/color/presets/green-cyan.svg]]          | [[http://media.thi.ng/color/presets/blue-cyan.svg]]   |
+| :green-cyan                                               | :blue-cyan                                        |
+| [[http://media.thi.ng/color/presets/yellow-red.svg]]          | [[http://media.thi.ng/color/presets/red-blue.svg]]    |
+| :yellow-red                                               | :red-blue                                         |
+
+*** Implementation
+
+#+BEGIN_SRC clojure :noweb-ref generators
+  (defn cosine-gradient-color
+    [offset amp fmod phase t]
+    (mapv
+     (fn [a b c d] (m/clamp (+ a (* b (Math/cos (* TWO_PI (+ (* c t) d))))) 0 1))
+     offset amp fmod phase))
+
+  (defn cosine-gradient-scheme
+    "Takes a length n and 4 cosine coefficients (for colors usually
+    3-element vectors) and produces vector of n new vectors, with each
+    of its elements defined by an AM & FM cosine wave and clamped to
+    the [0 1] interval."
+    [n offset amp fmod phase]
+    (mapv (partial cosine-gradient-color offset amp fmod phase) (m/norm-range (dec n))))
+#+END_SRC
+
+*** Gradient presets visualization
+
+This following snippet is *not* part of the library and only used to
+create the above preset visualizations. Requires http://thi.ng/geom to
+be added to your REPL/project in order to run...
+
+#+BEGIN_SRC clojure :tangle ../babel/examples/scheme-previews.clj
+  (require '[thi.ng.geom.viz.core :as viz])
+  (require '[thi.ng.geom.svg.core :as svg])
+  (require '[thi.ng.math.core :as m])
+  (require '[thi.ng.color.schemes :as schemes])
+
+  (defn channel-specs
+    [colors]
+    (map-indexed
+     (fn [idx col]
+       {:values  (map (fn [i c] [i (nth c idx)]) (m/norm-range (dec (count colors))) colors)
+        :attribs {:fill "none" :stroke col}
+        :layout  viz/svg-line-plot})
+     ["red" "green" "blue"]))
+
+  (doseq [[id coeffs] schemes/gradient-scheme-presets]
+    (let [colors (apply schemes/cosine-gradient-scheme 100 coeffs)]
+      (->> {:x-axis (viz/linear-axis
+                     {:domain [0 1] :range [50 580] :major 0.5 :minor 0.125 :pos 250})
+            :y-axis (viz/linear-axis
+                     {:domain [0 1] :range [250 20] :major 0.2 :minor 0.1 :pos 50
+                      :label-dist 15 :label {:text-anchor "end"}})
+            :grid   {:minor-y true}
+            :data   (channel-specs colors)}
+           (viz/svg-plot2d-cartesian)
+           (svg/svg
+            {:width 600 :height 300}
+            (for [i (m/norm-range 99)]
+              (svg/rect [(m/mix 50 570 i) 280] 10 20 {:fill (colors (int (* i 99)))})))
+           (svg/serialize)
+           (spit (str (name id) ".svg")))))
+#+END_SRC
+
+** Complete namespace definition
+
+#+BEGIN_SRC clojure :tangle ../babel/src/thi/ng/color/schemes.cljc :noweb yes :mkdirp yes :padline no
+  (ns thi.ng.color.schemes
+    #?(:cljs
+    (:require-macros
+     [thi.ng.math.macros :as mm]))
+    (:require
+     [thi.ng.math.core :as m :refer [PI TWO_PI]]
+     [thi.ng.color.core :as col]
+     #?(:clj [thi.ng.math.macros :as mm])))
+
+  <<generators>>
+#+END_SRC
