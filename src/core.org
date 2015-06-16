@@ -15,7 +15,8 @@
 
 - [[https://github.com/flixel-gdx/flixel-gdx/blob/master/flixel-core/src/org/flixel/data/shaders/blend/luminosity.glsl][flixel-gdx]]
 - [[http://www.chilliant.com/rgb2hsv.html][chilliant.com]]
-- [[https://en.wikipedia.org/wiki/YCbCr][Wikipedia]]
+- [[https://en.wikipedia.org/wiki/YCbCr][Wikipedia YCbCr]]
+- [[https://en.wikipedia.org/wiki/YUV][Wikipedia YUV]]
 
 #+BEGIN_SRC clojure :noweb-ref conversion
   (defn with-alpha
@@ -177,6 +178,26 @@
       (m/clamp (- (- (+ 0.5 (* 0.5 r)) (* 0.418688 g)) (* 0.081312 b)) 0.0 1.0)])
     ([r g b a]
      (conj (rgb->ycbcr r g b) a)))
+
+  (defn rgb->yuv
+    ([rgba]
+     (apply rgb->yuv rgba))
+    ([r g b]
+     [(mm/madd 0.299 r 0.587 g 0.114 b)
+      (mm/madd -0.1473 r -0.28886 g 0.436 b)
+      (mm/madd 0.615 r -0.51499 g -0.10001 b)])
+    ([r g b a]
+     (conj (rgb->yuv r g b) a)))
+
+  (defn yuv->rgb
+    ([yuva]
+     (apply yuv->rgb yuva))
+    ([y u v]
+     [(m/clamp (mm/madd 1.13983 v y) 0.0 1.0)
+      (m/clamp (- y (mm/madd 0.39465 u 0.5806 v)) 0.0 1.0)
+      (m/clamp (mm/madd 2.03211 u y) 0.0 1.0)])
+    ([y u v a]
+     (conj (yuv->rgb y u v) a)))
 
   (defn cmyk->rgb
     ([cmyk]
