@@ -34,7 +34,7 @@ This project is open source and licensed under the [[http://www.apache.org/licen
 ** Injected properties                                             :noexport:
 
 #+BEGIN_SRC clojure :noweb-ref version
-0.3.0
+0.3.1
 #+END_SRC
 
 #+BEGIN_SRC clojure :exports none :noweb-ref project-url

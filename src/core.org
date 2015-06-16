@@ -15,6 +15,7 @@
 
 - [[https://github.com/flixel-gdx/flixel-gdx/blob/master/flixel-core/src/org/flixel/data/shaders/blend/luminosity.glsl][flixel-gdx]]
 - [[http://www.chilliant.com/rgb2hsv.html][chilliant.com]]
+- [[https://en.wikipedia.org/wiki/YCbCr][Wikipedia]]
 
 #+BEGIN_SRC clojure :noweb-ref conversion
   (defn with-alpha
@@ -101,9 +102,9 @@
        [l l l]
        (let [f2 (if (< l 0.5) (* l (inc s)) (- (+ l s) (* l s)))
              f1 (- (* 2.0 l) f2)]
-         [(hsl-hue->rgb f1 f2 (+ h THIRD))
-          (hsl-hue->rgb f1 f2 h)
-          (hsl-hue->rgb f1 f2 (- h THIRD))])))
+         [(m/clamp (hsl-hue->rgb f1 f2 (+ h THIRD)) 0.0 1.0)
+          (m/clamp (hsl-hue->rgb f1 f2 h) 0.0 1.0)
+          (m/clamp (hsl-hue->rgb f1 f2 (- h THIRD)) 0.0 1.0)])))
     ([h s l a]
      (conj (hsl->rgb h s l) a)))
 
@@ -122,7 +123,7 @@
            [qx qy qz qw] (if (< r px) [px py pw r] [r py pz px])
            c (- qx (min qw qy))
            h (m/abs (+ (/ (- qw qy) (mm/madd 6.0 c 1e-10)) qz))]
-       [h c qx]))
+       [(m/clamp h 0.0 1.0) (m/clamp c 0.0 1.0) (m/clamp qx 0.0 1.0)]))
     ([r g b a]
      (conj (rgb->hcv r g b) a)))
 
@@ -137,8 +138,8 @@
          (let [[r' g' b'] (hue->rgb h)
                z (mm/madd 0.299 r' 0.587 g' 0.114 b')]
            (if (> (- y z) 1e-5)
-             [h (* c (mm/subdiv 1.0 z 1.0 y)) y]
-             [h (* c (/ z y)) y])))))
+             [h (m/clamp (* c (mm/subdiv 1.0 z 1.0 y)) 0.0 1.0) y]
+             [h (m/clamp (* c (/ z y)) 0.0 1.0) y])))))
     ([r g b a]
      (conj (rgb->hcy r g b) a)))
 
@@ -149,9 +150,33 @@
      (let [[r g b] (hue->rgb h)
            z (mm/madd 0.299 r 0.587 g 0.114 b)
            c' (if (< y z) (* c (/ y z)) (if (< z 1.0) (* c (mm/subdiv 1.0 y 1.0 z)) c))]
-       [(mm/submadd r z c' y) (mm/submadd g z c' y) (mm/submadd b z c' y)]))
+       [(m/clamp (mm/submadd r z c' y) 0.0 1.0)
+        (m/clamp (mm/submadd g z c' y) 0.0 1.0)
+        (m/clamp (mm/submadd b z c' y) 0.0 1.0)]))
     ([h c y a]
      (conj (hcy->rgb h c y) a)))
+
+  (defn ycbcr->rgb
+    ([ycbcra]
+     (apply ycbcr->rgb ycbcra))
+    ([y cb cr]
+     (let [cb' (- cb 0.5)
+           cr' (- cr 0.5)]
+       [(m/clamp (mm/madd cr' 1.402 y) 0.0 1.0)
+        (m/clamp (- y (mm/madd cb' 0.34414 cr' 0.71414)) 0.0 1.0)
+        (m/clamp (mm/madd cb' 1.772 y) 0.0 1.0)]))
+    ([y cb cr a]
+     (conj (ycbcr->rgb y cb cr) a)))
+
+  (defn rgb->ycbcr
+    ([rgba]
+     (apply rgb->ycbcr rgba))
+    ([r g b]
+     [(m/clamp (mm/madd 0.299 r 0.587 g 0.114 b) 0.0 1.0)
+      (m/clamp (+ (- (- 0.5 (* 0.16874 r)) (* 0.33126 g)) (* 0.5 b)) 0.0 1.0)
+      (m/clamp (- (- (+ 0.5 (* 0.5 r)) (* 0.418688 g)) (* 0.081312 b)) 0.0 1.0)])
+    ([r g b a]
+     (conj (rgb->ycbcr r g b) a)))
 
   (defn cmyk->rgb
     ([cmyk]
@@ -180,9 +205,11 @@
 
   (defn- cie1931-gamma-correct
     [x]
-    (if (< x 0.0031308)
-      (* 12.92 x)
-      (mm/msub 1.055 (Math/pow x (/ 2.4)) 0.055)))
+    (m/clamp
+     (if (< x 0.0031308)
+       (* 12.92 x)
+       (mm/msub 1.055 (Math/pow x (/ 2.4)) 0.055))
+     0.0 1.0))
 
   (defn cie1931->rgb
     ([xyz]
