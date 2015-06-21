@@ -8,10 +8,12 @@ Brewer categorical color schemes).
 
 Supported color space conversions (all with optional alpha channel):
 
-- RGB to HSV, HSL, HCY, HCV, CIE1931, CMYK, CSS, int32
+- RGB to HSV, HSL, HCY, HCV, CIE1931, YCbCr, YUV, CMYK, CSS, int32
 - HSV to RGB, CSS
 - HSL to RGB, CSS
 - HCY to RGB
+- YCbCr to RGB
+- YUV to RGB
 - CYMK to RGB
 
 *Note:* This library relies on the new conditional reader syntax of
@@ -23,5 +25,5 @@ Please see [index.org](src/index.org) for further information.
 ## Current Leiningen coordinates
 
 ```clj
-[thi.ng/color "0.3.0"]
+[thi.ng/color "0.3.1"]
 ```
