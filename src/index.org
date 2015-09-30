@@ -35,12 +35,12 @@ supported.
 
 The current set of color operations includes:
 
-- rotation
-- brightness/saturation adjustments
+- hue rotation
+- brightness/saturation/alpha adjustments
 - complementary/inverse colors
 - hue matching
 - blending (with & without alpha)
-- distance calculations
+- distance calculations in RGB/HSV
 
 Furthermore the library includes namespaces to generate procedural
 gradients and features 100+ CSS named color presets as well as D3's &
@@ -65,7 +65,7 @@ STABLE & under regular development
 ** Injected properties                                             :noexport:
 
 #+BEGIN_SRC clojure :noweb-ref version
-0.3.1
+1.0.0-SNAPSHOT
 #+END_SRC
 
 #+BEGIN_SRC clojure :exports none :noweb-ref project-url
@@ -80,19 +80,23 @@ target/color-<<version>>.js
 *** Runtime
 **** [[https://github.com/clojure/clojure][Clojure]]
 #+BEGIN_SRC clojure :noweb-ref dep-clj
-[org.clojure/clojure "1.7.0-RC2"]
+[org.clojure/clojure "1.7.0"]
 #+END_SRC
 **** [[https://github.com/clojure/clojurescript][ClojureScript]]
 #+BEGIN_SRC clojure :noweb-ref dep-cljs
-[org.clojure/clojurescript "0.0-3308"]
+[org.clojure/clojurescript "1.7.122"]
 #+END_SRC
 **** [[https://github.com/thi-ng/math][thi.ng/math]]
 #+BEGIN_SRC clojure :noweb-ref dep-math
 [thi.ng/math "0.1.4"]
 #+END_SRC
 **** [[https://github.com/thi-ng/strf][thi.ng/strf]]
-#+BEGIN_SRC clojure :noweb-ref dep-math
-[thi.ng/strf "0.1.0"]
+#+BEGIN_SRC clojure :noweb-ref dep-strf
+[thi.ng/strf "0.2.1"]
+#+END_SRC
+**** [[https://github.com/thi-ng/xerror][thi.ng/xerror]]
+#+BEGIN_SRC clojure :noweb-ref dep-xerror
+[thi.ng/xerror "0.1.0"]
 #+END_SRC
 *** Development
 **** [[https://github.com/hugoduncan/criterium][Criterium]]
@@ -173,7 +177,8 @@ in the REPL via =(require 'thi.ng.color... :reload)= or similar.
     :dependencies [<<dep-clj>>
                    <<dep-cljs>>
                    <<dep-math>>
-                   <<dep-strf>>]
+                   <<dep-strf>>
+                   <<dep-xerror>>]
 
     :profiles     {:dev {:dependencies [<<dep-criterium>>]
                          :plugins      [<<dep-cljsbuild>>
