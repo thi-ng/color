@@ -133,11 +133,10 @@
     ICSSConvert
     (as-css
       [_]
-      (css
-       (if (< a 1.0)
-         (let [r (* 0xff r) g (* 0xff g) b (* 0xff b)]
-           (str "rgba(" (int r) \, (int g) \, (int b) \, (max 0.0 a) ")"))
-         (as-css (as-int24 _)))))
+      (if (< a 1.0)
+        (let [r (* 0xff r) g (* 0xff g) b (* 0xff b)]
+          (css (str "rgba(" (int r) \, (int g) \, (int b) \, (max 0.0 a) ")")))
+        (as-css (as-int24 _))))
     IIntConvert
     (as-int24
       [_]
@@ -222,7 +221,7 @@
       [_] (as-cmyka (as-rgba _)))
     ICSSConvert
     (as-css
-      [_] (f/format hex6 (bit-and col 0xffffff)))
+      [_] (css (f/format hex6 (bit-and col 0xffffff))))
     IIntConvert
     (as-int24 [_] _)
     (as-int32
@@ -289,7 +288,10 @@
       [_] (as-cmyka (as-rgba _)))
     ICSSConvert
     (as-css
-      [_] (as-css (as-rgba _)))
+      [_]
+      (if (== 0xff000000 (bit-and col 0xff000000))
+        (css (f/format hex6 (bit-and col 0xffffff)))
+        (as-css (as-rgba _))))
     IIntConvert
     (as-int24
       [_] (Int24. (bit-and col 0xffffff)))
