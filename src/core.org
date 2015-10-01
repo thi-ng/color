@@ -15,7 +15,7 @@
          - [[#constructors][Constructors]]
      - [[#proxied-color-types][Proxied color types]]
      - [[#color-space--format-conversion-helpers][Color space & format conversion helpers]]
-     - [[#color-components][Color components]]
+     - [[#hue-matching][Hue matching]]
      - [[#color-operations][Color operations]]
          - [[#blending][Blending]]
      - [[#constants][Constants]]
@@ -135,7 +135,7 @@
       [_]
       (css
        (if (< a 1.0)
-         (let [r (* 255 r) g (* 255 g) b (* 255 b)]
+         (let [r (* 0xff r) g (* 0xff g) b (* 0xff b)]
            (str "rgba(" (int r) \, (int g) \, (int b) \, (max 0.0 a) ")"))
          (as-css (as-int24 _)))))
     IIntConvert
@@ -144,19 +144,19 @@
       (int24
        (bit-or
         (bit-or
-         (-> r (* 255) int (bit-shift-left 16))
-         (-> g (* 255) int (bit-shift-left 8)))
-        (-> b (* 255) int))))
+         (-> r (* 0xff) int (bit-shift-left 16))
+         (-> g (* 0xff) int (bit-shift-left 8)))
+        (-> b (* 0xff) int))))
     (as-int32
       [_]
       (int32
        (bit-or
         (bit-or
          (bit-or
-          (-> r (* 255) int (bit-shift-left 16))
-          (-> g (* 255) int (bit-shift-left 8)))
-         (-> b (* 255) int))
-        (bit-shift-left (int (* a 255)) 24))))
+          (-> r (* 0xff) int (bit-shift-left 16))
+          (-> g (* 0xff) int (bit-shift-left 8)))
+         (-> b (* 0xff) int))
+        (bit-shift-left (int (* a 0xff)) 24))))
     IColorComponents
     (red [_] r)
     (green [_] g)
@@ -207,9 +207,9 @@
     (as-rgba
       [_]
       (RGBA.
-       (* INV8BIT (bit-and (bit-shift-right col 16) 255))
-       (* INV8BIT (bit-and (bit-shift-right col 8) 255))
-       (* INV8BIT (bit-and col 255))
+       (* INV8BIT (bit-and (bit-shift-right col 16) 0xff))
+       (* INV8BIT (bit-and (bit-shift-right col 8) 0xff))
+       (* INV8BIT (bit-and col 0xff))
        1.0))
     IHSVConvert
     (as-hsva
@@ -229,11 +229,11 @@
       [_] (int32 (bit-or col 0xff000000)))
     IColorComponents
     (red
-      [_] (* INV8BIT (bit-and (bit-shift-right col 16) 255)))
+      [_] (* INV8BIT (bit-and (bit-shift-right col 16) 0xff)))
     (green
-      [_] (* INV8BIT (bit-and (bit-shift-right col 8) 255)))
+      [_] (* INV8BIT (bit-and (bit-shift-right col 8) 0xff)))
     (blue
-      [_] (* INV8BIT (bit-and col 255)))
+      [_] (* INV8BIT (bit-and col 0xff)))
     (alpha [_] 1)
     (hue
       [_] (hue (as-hsva _)))
@@ -274,10 +274,10 @@
     (as-rgba
       [_]
       (RGBA.
-       (* INV8BIT (bit-and (bit-shift-right col 16) 255))
-       (* INV8BIT (bit-and (bit-shift-right col 8) 255))
-       (* INV8BIT (bit-and col 255))
-       (* INV8BIT (bit-and (unsigned-bit-shift-right col 24) 255))))
+       (* INV8BIT (bit-and (bit-shift-right col 16) 0xff))
+       (* INV8BIT (bit-and (bit-shift-right col 8) 0xff))
+       (* INV8BIT (bit-and col 0xff))
+       (* INV8BIT (bit-and (unsigned-bit-shift-right col 24) 0xff))))
     IHSVConvert
     (as-hsva
       [_] (as-hsva (as-rgba _)))
@@ -296,13 +296,13 @@
     (as-int32 [_] _)
     IColorComponents
     (red
-      [_] (* INV8BIT (bit-and (bit-shift-right col 16) 255)))
+      [_] (* INV8BIT (bit-and (bit-shift-right col 16) 0xff)))
     (green
-      [_] (* INV8BIT (bit-and (bit-shift-right col 8) 255)))
+      [_] (* INV8BIT (bit-and (bit-shift-right col 8) 0xff)))
     (blue
-      [_] (* INV8BIT (bit-and col 255)))
+      [_] (* INV8BIT (bit-and col 0xff)))
     (alpha
-      [_] (* INV8BIT (bit-and (unsigned-bit-shift-right col 24) 255)))
+      [_] (* INV8BIT (bit-and (unsigned-bit-shift-right col 24) 0xff)))
     (hue
       [_] (hue (as-hsva _)))
     (saturation
@@ -328,8 +328,8 @@
       [_ offset] (-> _ (as-hsva) (adjust-brightness offset) (as-int32)))
     (adjust-alpha
       [_ offset]
-      (let [a (* INV8BIT (bit-and (unsigned-bit-shift-right col 24) 255))
-            a (int (* 255 (m/clamp (+ a offset) 0.0 1.0)))]
+      (let [a (* INV8BIT (bit-and (unsigned-bit-shift-right col 24) 0xff))
+            a (int (* 0xff (m/clamp (+ a offset) 0.0 1.0)))]
         (Int32. (bit-or (bit-and col 0xffffff) (bit-shift-left a 24)))))
     (invert
       [_] (Int32. (bit-xor col 0xffffff))))
@@ -603,9 +603,13 @@
       [_] _)
     IIntConvert
     (as-int24
-      [_] (as-int24 (as-rgba _)))
+      [_]
+      (let [c (parse-css col)]
+          (if (instance? Int24 c) c (as-int24 c))))
     (as-int32
-      [_] (as-int32 (as-rgba _)))
+      [_]
+      (let [c (parse-css col)]
+          (if (instance? Int32 c) c (as-int32 c))))
     IColorComponents
     (red
       [_] (red (as-rgba _)))
@@ -754,7 +758,7 @@
   (defn int32
     ([col] (Int32. col))
     ([col alpha]
-     (let [a (int (* 255 (m/clamp alpha 0.0 1.0)))]
+     (let [a (int (* 0xff (m/clamp alpha 0.0 1.0)))]
        (Int32. (bit-or (bit-and col 0xffffff) (bit-shift-left a 24))))))
 
   (defn hsva
@@ -810,7 +814,7 @@
        (m/clamp (- 2.0 (m/abs (- h 2.0))) 0.0 1.0)
        (m/clamp (- 2.0 (m/abs (- h 4.0))) 0.0 1.0)]))
 
-  (defn rgba->hcva
+  (defn- rgba->hcva
     [^RGBA rgba]
     (let [r             (.-r rgba)
           g             (.-g rgba)
@@ -822,7 +826,7 @@
           h             (m/abs (+ (/ (- qw qy) (mm/madd 6.0 c 1e-10)) qz))]
       [(m/clamp h 0.0 1.0) (m/clamp c 0.0 1.0) (m/clamp qx 0.0 1.0) a]))
 
-  (defn rgba->hcya
+  (defn- rgba->hcya
     [^RGBA rgba]
     (let [r         (.-r rgba)
           g         (.-g rgba)
@@ -837,7 +841,7 @@
             [h (m/clamp (* c (mm/subdiv 1.0 z 1.0 y)) 0.0 1.0) y a]
             [h (m/clamp (* c (/ z y)) 0.0 1.0) y a])))))
 
-  (defn hcya->rgba
+  (defn- hcya->rgba
     ([hcya]
      (apply hcya->rgba hcya))
     ([h c y]
@@ -852,7 +856,7 @@
         (m/clamp (mm/submadd b z c' y) 0.0 1.0)
         a))))
 
-  (defn ycbcra->rgba
+  (defn- ycbcra->rgba
     ([ycbcra]
      (apply ycbcra->rgba ycbcra))
     ([y cb cr]
@@ -866,7 +870,7 @@
         (m/clamp (mm/madd cb' 1.772 y) 0.0 1.0)
         a))))
 
-  (defn rgba->ycbcra
+  (defn- rgba->ycbcra
     [^RGBA rgba]
     (let [r (.-r rgba)
           g (.-g rgba)
@@ -876,7 +880,7 @@
        (m/clamp (+ (- (- 0.5 (* 0.16874 r)) (* 0.33126 g)) (* 0.5 b)) 0.0 1.0)
        (m/clamp (- (- (+ 0.5 (* 0.5 r)) (* 0.418688 g)) (* 0.081312 b)) 0.0 1.0)]))
 
-  (defn rgba->yuva
+  (defn- rgba->yuva
     [^RGBA rgba]
     (let [r (.-r rgba)
           g (.-g rgba)
@@ -887,7 +891,7 @@
        (mm/madd 0.615 r -0.51499 g -0.10001 b)
        a]))
 
-  (defn yuva->rgba
+  (defn- yuva->rgba
     ([yuva]
      (apply yuva->rgba yuva))
     ([y u v]
@@ -906,7 +910,7 @@
        (mm/msub 1.055 (Math/pow x (/ 2.4)) 0.055))
      0.0 1.0))
 
-  (defn cie1931->rgb
+  (defn- cie1931->rgb
     ([xyz]
      (apply cie1931->rgb xyz))
     ([x y z]
@@ -917,16 +921,16 @@
       (cie1931-gamma-correct (mm/madd 0.0557 x -0.2040 y 1.0570 z))
       a]))
 
-  (defn- hex->rgba
+  (defn hex->int
     [hex]
     (let [hex (if (= \# (first hex)) (subs hex 1) hex)
           len (count hex)]
       (if (== 3 len)
         (let [[r g b] hex]
-          (as-rgba (int24 (f/parse-int (str r r g g b b) 16 0))))
+          (int24 (f/parse-int (str r r g g b b) 16 0)))
         (if (< len 7)
-          (as-rgba (int24 (f/parse-int hex 16 0)))
-          (as-rgba (int32 (f/parse-int hex 16 0)))))))
+          (int24 (f/parse-int hex 16 0))
+          (int32 (f/parse-int hex 16 0))))))
 
   (defn- parse-channel-val
     [^String c]
@@ -937,7 +941,7 @@
   (defn- parse-css
     [col]
     (if (= \# (first col))
-      (hex->rgba col)
+      (hex->int col)
       (let [[[_ mode a b c d]] (re-seq #"(rgb|hsl)a?\((\d+%?),(\d+%?),(\d+%?),?([0-9\.]+)?\)" col)]
         (if mode
           (if (#{"rgb" "rgba"} mode)
@@ -955,7 +959,7 @@
           (err/illegal-arg! col)))))
 #+END_SRC
 
-** Color components
+** Hue matching
 
 #+BEGIN_SRC clojure :noweb-ref ops
   (def hues
@@ -967,19 +971,27 @@
     (select-keys hues [:red :yellow :green :cyan :blue :magenta]))
 
   (defn closest-hue
-    ([h] (closest-hue h hues))
-    ([h hues]
+    "Takes a color and map of hues (e.g. thi.ng.color.core.primary-hues),
+    returns key of closest hue."
+    ([col] (closest-hue col hues))
+    ([col hues]
+     (let [h (hue col)]
        (first
         (reduce
          (fn [[h' d'] [k v]]
            (let [d (min (m/abs-diff h v) (m/abs-diff (dec h) v))]
              (if (< d d') [k d] [h' d'])))
-         [nil 1e6] hues))))
+         [nil 1e6] hues)))))
 
-  (defn gamma-rgba
-    [[r g b & [a]] e]
-    (let [rgb' (mapv #(Math/pow % e) [r g b])]
-      (if a (conj rgb' a) rgb')))
+  (defn gamma-correct
+    "Returns gamma corrected version of color as RGBA"
+    [col gamma]
+    (let [^RGBA col (as-rgba col)]
+      (RGBA.
+       (Math/pow (.-r col) gamma)
+       (Math/pow (.-g col) gamma)
+       (Math/pow (.-b col) gamma)
+       (.-a col))))
 #+END_SRC
 
 ** Color operations
@@ -1051,7 +1063,7 @@
   (def THIRD (/ 1.0 3))
   (def TWO_THIRD (/ 2.0 3))
   (def SIXTH (/ 1.0 6))
-  (def INV8BIT (/ 1.0 255))
+  (def INV8BIT (/ 1.0 0xff))
 
   (def ^:private hex6 ["#" (f/hex 6)])
 
