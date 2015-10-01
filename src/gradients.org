@@ -66,9 +66,10 @@ generator...
 #+BEGIN_SRC clojure :noweb-ref generators
   (defn cosine-gradient-color
     [offset amp fmod phase t]
-    (mapv
-     (fn [a b c d] (m/clamp (+ a (* b (Math/cos (* TWO_PI (+ (* c t) d))))) 0 1))
-     offset amp fmod phase))
+    (col/rgba
+     (mapv
+      (fn [a b c d] (m/clamp (+ a (* b (Math/cos (* TWO_PI (+ (* c t) d))))) 0 1))
+      offset amp fmod phase)))
 
   (defn cosine-gradient
     "Takes a length n and 4 cosine coefficients (for colors usually
@@ -103,6 +104,7 @@ When tangling this file, the code below will be saved in the
 =/babel/dev/= subdir of this project...
 
 #+BEGIN_SRC clojure :tangle ../babel/dev/cosine-previews.clj :mkdirp yes :padline no
+  (require '[thi.ng.color.core :as col])
   (require '[thi.ng.color.gradients :as grad])
   (require '[thi.ng.geom.viz.core :as viz])
   (require '[thi.ng.geom.svg.core :as svg])
@@ -113,7 +115,7 @@ When tangling this file, the code below will be saved in the
     (map-indexed
      (fn [idx col]
        {:values  (viz/uniform-domain-points [0 1] (map #(nth % idx) colors))
-        :attribs {:fill "none" :stroke col}
+        :attribs {:fill "none" :stroke (col/as-css col)}
         :layout  viz/svg-line-plot})
      ["red" "green" "blue"]))
 
@@ -121,7 +123,7 @@ When tangling this file, the code below will be saved in the
     [x1 x2 y w h colors]
     (let [n (dec (count colors))]
       (for [i (m/norm-range n)]
-        (svg/rect [(m/mix x1 x2 i) y] w h {:fill (colors (int (* i n)))}))))
+        (svg/rect [(m/mix x1 x2 i) y] w h {:fill (col/as-css (colors (int (* i n))))}))))
 
   (doseq [[id coeffs] grad/cosine-schemes]
     (let [colors (apply grad/cosine-gradient 100 coeffs)]

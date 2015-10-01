@@ -182,13 +182,13 @@ downloads results as CSV file:
      :yellow-green 0x9acd32
      })
 
-  (defn preset-rgb [id] (-> id colors col/int->rgba (subvec 0 3)))
+  (defn preset-rgb [id] (-> id colors col/int24 col/rgba))
 
-  (defn preset-hsv [id] (->> id preset-rgb (apply col/rgb->hsv)))
+  (defn preset-hsv [id] (->> id preset-rgb col/as-hsva))
 
-  (defn preset-cmyk [id] (->> id preset-rgb (apply col/rgb->cmyk)))
+  (defn preset-cmyk [id] (->> id preset-rgb col/as-cmyka))
 
-  (defn preset-css [id] (->> id colors col/int->hex))
+  (defn preset-css [id] (->> id colors col/int24 col/as-css))
 #+END_SRC
 
 ** thi.ng.color.categories
@@ -595,12 +595,12 @@ formats via the =brewer-scheme-*= functions defined below.
   (defn brewer-scheme-rgb
     [pallette cls]
     (if-let [cols (brewer-scheme-int pallette cls)]
-      (mapv #(-> % col/int->rgba (subvec 0 3)) cols)))
+      (mapv #(-> % col/int24 col/as-rgba) cols)))
 
   (defn brewer-scheme-css
     [pallette cls]
     (if-let [cols (brewer-scheme-int pallette cls)]
-      (mapv col/int->hex cols)))
+      (mapv #(-> % col/int24 col/as-css) cols)))
 #+END_SRC
 
 The following code block is *not* part of the library distribution and
