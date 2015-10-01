@@ -4,6 +4,7 @@
  - [[#namespace-thingcolorcore][Namespace: thi.ng.color.core]]
      - [[#protocols][Protocols]]
      - [[#color-types--conversions][Color types & conversions]]
+         - [[#deref-template][Deref template]]
          - [[#rgba][RGBA]]
          - [[#packed-rgba-ints][Packed RGB(A) ints]]
          - [[#hsva][HSVA]]
@@ -65,23 +66,25 @@
     (adjust-brightness [_ offset])
     (adjust-alpha [_ offset])
     (invert [_]))
-
-  (defprotocol IUnwrap
-    (unwrap [_]))
 #+END_SRC
 
 ** Color types & conversions
 
+*** Deref template
+
+#+NAME: deref
+#+BEGIN_SRC emacs-lisp :var val=""
+  (replace-regexp-in-string "{{val}}" val
+  "#?@(:clj [clojure.lang.IDeref (deref [_] {{val}})] :cljs [IDeref (-deref [_] {{val}})])")
+#+END_SRC
 *** RGBA
 
-#+BEGIN_SRC clojure :noweb-ref impl
+#+BEGIN_SRC clojure :noweb-ref impl :noweb yes
   (deftype RGBA [^double r ^double g ^double b ^double a]
+    <<deref(val="[r g b a]")>>
     Object
     (toString
       [_] (str ns-prefix "RGBA [" r " " g " " b " " a "]"))
-    IUnwrap
-    (unwrap
-      [_] [r g b a])
     IRGBConvert
     (as-rgba [_] _)
     IHSVConvert
@@ -194,14 +197,12 @@
 
 *** Packed RGB(A) ints
 
-#+BEGIN_SRC clojure :noweb-ref impl
+#+BEGIN_SRC clojure :noweb-ref impl :noweb yes
   (deftype Int24 [^int col]
+    <<deref(val="col")>>
     Object
     (toString
       [_] (str ns-prefix "Int24 [" col "]"))
-    IUnwrap
-    (unwrap
-      [_] col)
     IRGBConvert
     (as-rgba
       [_]
@@ -263,12 +264,10 @@
       [_] (Int24. (bit-xor col 0xffffff))))
 
   (deftype Int32 [^long col]
+    <<deref(val="col")>>
     Object
     (toString
       [_] (str ns-prefix "Int32 [" col "]"))
-    IUnwrap
-    (unwrap
-      [_] col)
     IRGBConvert
     (as-rgba
       [_]
@@ -341,14 +340,12 @@
 
 - http://codeitdown.com/hsl-hsb-hsv-color/
 
-#+BEGIN_SRC clojure :noweb-ref impl
+#+BEGIN_SRC clojure :noweb-ref impl :noweb yes
   (deftype HSVA [^double h ^double s ^double v ^double a]
+    <<deref(val="[h s v a]")>>
     Object
     (toString
       [_] (str ns-prefix "HSVA [" h " " s " " v " " a "]"))
-    IUnwrap
-    (unwrap
-      [_] [h s v a])
     IRGBConvert
     (as-rgba
       [_]
@@ -422,14 +419,12 @@
 
 *** HSLA
 
-#+BEGIN_SRC clojure :noweb-ref impl
+#+BEGIN_SRC clojure :noweb-ref impl :noweb yes
   (deftype HSLA [^double h ^double s ^double l ^double a]
+    <<deref(val="[h s l a]")>>
     Object
     (toString
       [_] (str ns-prefix "HSLA [" h " " s " " l " " a "]"))
-    IUnwrap
-    (unwrap
-      [_] [h s l a])
     IRGBConvert
     (as-rgba
       [_]
@@ -505,14 +500,12 @@
 
 *** CMYK
 
-#+BEGIN_SRC clojure :noweb-ref impl
+#+BEGIN_SRC clojure :noweb-ref impl :noweb yes
   (deftype CMYKA [^double c ^double m ^double y ^double k ^double a]
+    <<deref(val="[c m y k a]")>>
     Object
     (toString
       [_] (str ns-prefix "CMYKA [" c " " m " " y " " k " " a "]"))
-    IUnwrap
-    (unwrap
-      [_] [c m y k a])
     IRGBConvert
     (as-rgba
       [_]
@@ -576,14 +569,12 @@
 
 *** CSS
 
-#+BEGIN_SRC clojure :noweb-ref impl
+#+BEGIN_SRC clojure :noweb-ref impl :noweb yes
   (deftype CSS [^String col]
+    <<deref(val="col")>>
     Object
     (toString
       [_] (str ns-prefix "CSS [\"" col "\"]"))
-    IUnwrap
-    (unwrap
-      [_] col)
     IRGBConvert
     (as-rgba
       [_]
@@ -652,17 +643,15 @@
 
 *** Generic color space support proxy
 
-#+BEGIN_SRC clojure :noweb-ref impl
+#+BEGIN_SRC clojure :noweb-ref impl :noweb yes
   (defn proxied-color-type
     [to-rgba from-rgba]
     (fn ctor [col]
       (reify
+        <<deref(val="col")>>
         Object
         (toString
           [_] (pr-str col))
-        IUnwrap
-        (unwrap
-          [_] col)
         IRGBConvert
         (as-rgba [_] (to-rgba col))
         IHSVConvert

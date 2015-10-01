@@ -114,7 +114,7 @@ When tangling this file, the code below will be saved in the
     [colors]
     (map-indexed
      (fn [idx col]
-       {:values  (viz/uniform-domain-points [0 1] (map #(nth (col/unwrap %) idx) colors))
+       {:values  (viz/uniform-domain-points [0 1] (map #(nth (deref %) idx) colors))
         :attribs {:fill "none" :stroke col}
         :layout  viz/svg-line-plot})
      ["red" "green" "blue"]))
