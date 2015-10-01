@@ -77,7 +77,7 @@ generator...
     of its elements defined by an AM & FM cosine wave and clamped to
     the [0 1] interval."
     [n offset amp fmod phase]
-    (mapv (partial cosine-gradient-color offset amp fmod phase) (m/norm-range (dec n))))
+    (mapv #(cosine-gradient-color offset amp fmod phase %) (m/norm-range (dec n))))
 #+END_SRC
 
 *** Example usage
@@ -114,8 +114,8 @@ When tangling this file, the code below will be saved in the
     [colors]
     (map-indexed
      (fn [idx col]
-       {:values  (viz/uniform-domain-points [0 1] (map #(nth % idx) colors))
-        :attribs {:fill "none" :stroke (col/as-css col)}
+       {:values  (viz/uniform-domain-points [0 1] (map #(nth (col/unwrap %) idx) colors))
+        :attribs {:fill "none" :stroke col}
         :layout  viz/svg-line-plot})
      ["red" "green" "blue"]))
 
@@ -123,7 +123,7 @@ When tangling this file, the code below will be saved in the
     [x1 x2 y w h colors]
     (let [n (dec (count colors))]
       (for [i (m/norm-range n)]
-        (svg/rect [(m/mix x1 x2 i) y] w h {:fill (col/as-css (colors (int (* i n))))}))))
+        (svg/rect [(m/mix x1 x2 i) y] w h {:fill (colors (int (* i n)))}))))
 
   (doseq [[id coeffs] grad/cosine-schemes]
     (let [colors (apply grad/cosine-gradient 100 coeffs)]
