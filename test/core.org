@@ -37,7 +37,7 @@
 
 #+BEGIN_SRC clojure :noweb-ref test
   (deftest conversion-hsv
-    (is (= thi.ng.color.core.HSVA (type (col/hsva 0 0 0))))
+   (is (= thi.ng.color.core.HSVA (type (col/hsva 0 0 0))))
    (is (d= [0 0.5 0.75 0.25] (col/unwrap (col/hsva 0 0.5 0.75 0.25))))
    (is (d= [1 0 0 0.5] (col/unwrap (col/as-rgba (col/hsva 0 1 1 0.5)))))
    (is (d= [0 1 0 1] (col/unwrap (col/as-rgba (col/hsva 0.3333333 1 1)))))
@@ -64,6 +64,24 @@
 #+END_SRC
 
 #+BEGIN_SRC clojure :noweb-ref test
+  (deftest conversion-hsl
+   (is (= thi.ng.color.core.HSLA (type (col/hsla 0 0 0))))
+   (is (d= [0 0.5 0.75 0.25] (col/unwrap (col/hsla 0 0.5 0.75 0.25))))
+   (is (d= [1 1 1 0.5] (col/unwrap (col/as-rgba (col/hsla 0 1 1 0.5)))))
+   (is (d= [1 0 0 0.5] (col/unwrap (col/as-rgba (col/hsla 0 1 0.5 0.5)))))
+   (is (d= [0 1 0 1] (col/unwrap (col/as-rgba (col/hsla 0.3333333 1 0.5)))))
+   (is (d= [0 1 1 1] (col/unwrap (col/as-rgba (col/hsla 0.5 1 0.5)))))
+   (is (d= [0 0 1 1] (col/unwrap (col/as-rgba (col/hsla 0.6666666 1 0.5 1)))))
+   (is (d= [0.5 0.5 0.5 1] (col/unwrap (col/as-rgba (col/hsla 0.6666666 0 0.5 1)))))
+   (is (d= 0xff0000 (col/unwrap (col/as-int24 (col/hsla 0 1 0.5)))))
+   (is (d= 0x00ff00 (col/unwrap (col/as-int24 (col/hsla 0.3333333 1 0.5)))))
+   (is (d= 0x0000ff (col/unwrap (col/as-int24 (col/hsla 0.6666666 1 0.5)))))
+   (is (d= 0x3fff0000 (col/unwrap (col/as-int32 (col/hsla 0 1 0.5 0.25)))))
+   (is (d= 0x7f00ff00 (col/unwrap (col/as-int32 (col/hsla 0.3333333 1 0.5 0.5)))))
+   (is (d= 0xff0000ff (col/unwrap (col/as-int32 (col/hsla 0.6666666 1 0.5))))))
+#+END_SRC
+
+#+BEGIN_SRC clojure :noweb-ref test
   (deftest css-parse
     (is (d= [1 0.8 0.2 1] (col/unwrap (col/as-rgba (col/css "#fc3")))))
     (is (d= [1 0.8 0.2 1] (col/unwrap (col/as-rgba (col/css "#ffcc33")))))
@@ -87,14 +105,13 @@
       (is (d= 0.25 (col/blue c2)))
       (is (d= 0.4 (col/alpha c1)))
       (is (d= 1 (col/alpha c2)))
-      #_(is (d= 0.2 (col/saturation c)))
-      #_(is (d= 0.3 (col/brightness c)))
+      (is (d= 0.75 (col/saturation c2)))
+      (is (d= 1 (col/brightness c2)))
       #_(is (d= 0.1 (col/cyan c)))
       #_(is (d= 0.2 (col/magenta c)))
       #_(is (d= 0.3 (col/yellow c)))
       #_(is (d= 0.4 (col/black c)))
-      #_(is (d= 0.4 (col/alpha c)))
-      #_(is (d= 0.1 (col/alpha [0 0 0 0 0.1])))))
+      #_(is (d= 0.4 (col/alpha c)))))
 #+END_SRC
 
 ** Complete namespace declaration
