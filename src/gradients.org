@@ -72,10 +72,10 @@ generator...
       offset amp fmod phase)))
 
   (defn cosine-gradient
-    "Takes a length n and 4 cosine coefficients (for colors usually
-    3-element vectors) and produces vector of n new vectors, with each
-    of its elements defined by an AM & FM cosine wave and clamped to
-    the [0 1] interval."
+    "Takes a length n and 4 cosine coefficients (for colors usually 3 or
+    4-element vectors) and produces vector of n new RGBA colors, with
+    each of its elements defined by an AM & FM cosine wave and clamped
+    to the [0 1] interval."
     [n offset amp fmod phase]
     (mapv #(cosine-gradient-color offset amp fmod phase %) (m/norm-range (dec n))))
 #+END_SRC
