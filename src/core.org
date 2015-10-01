@@ -36,7 +36,7 @@
     (as-hsla [_]))
 
   (defprotocol ICMYKConvert
-    (as-cmyk [_]))
+    (as-cmyka [_]))
 
   (defprotocol ICSSConvert
     (as-css [_]))
@@ -65,6 +65,9 @@
     (adjust-brightness [_ offset])
     (adjust-alpha [_ offset])
     (invert [_]))
+
+  (defprotocol IUnwrap
+    (unwrap [_]))
 #+END_SRC
 
 ** Color types & conversions
@@ -76,6 +79,9 @@
     Object
     (toString
       [_] (str ns-prefix "RGBA [" r " " g " " b " " a "]"))
+    IUnwrap
+    (unwrap
+      [_] [r g b a])
     IRGBConvert
     (as-rgba [_] _)
     IHSVConvert
@@ -113,7 +119,7 @@
                 h  (if (neg? h) (inc h) (if (>= h 1.0) (dec h) h))]
             (hsla h s l a)))))
     ICMYKConvert
-    (as-cmyk
+    (as-cmyka
       [_]
       (let [c (- 1.0 r)
             m (- 1.0 g)
@@ -146,10 +152,10 @@
       (int32
        (bit-or
         (bit-or
-          (bit-or
-           (-> r (* 255) int (bit-shift-left 16))
-           (-> g (* 255) int (bit-shift-left 8)))
-          (-> b (* 255) int))
+         (bit-or
+          (-> r (* 255) int (bit-shift-left 16))
+          (-> g (* 255) int (bit-shift-left 8)))
+         (-> b (* 255) int))
         (bit-shift-left (int (* a 255)) 24))))
     IColorComponents
     (red [_] r)
@@ -167,13 +173,13 @@
     (luminance
       [_] (mm/madd 0.299 r 0.587 g 0.114 b))
     (cyan
-      [_] (cyan (as-cmyk _)))
+      [_] (cyan (as-cmyka _)))
     (magenta
-      [_] (magenta (as-cmyk _)))
+      [_] (magenta (as-cmyka _)))
     (yellow
-      [_] (yellow (as-cmyk _)))
+      [_] (yellow (as-cmyka _)))
     (black
-      [_] (black (as-cmyk _)))
+      [_] (black (as-cmyka _)))
     IColorOps
     (rotate-hue
       [_ theta] (-> _ (as-hsva) (rotate-hue theta) (as-rgba)))
@@ -194,6 +200,9 @@
     Object
     (toString
       [_] (str ns-prefix "Int24 [" col "]"))
+    IUnwrap
+    (unwrap
+      [_] col)
     IRGBConvert
     (as-rgba
       [_]
@@ -209,8 +218,8 @@
     (as-hsla
       [_] (as-hsla (as-rgba _)))
     ICMYKConvert
-    (as-cmyk
-      [_] (as-cmyk (as-rgba _)))
+    (as-cmyka
+      [_] (as-cmyka (as-rgba _)))
     ICSSConvert
     (as-css
       [_] (f/format hex6 (bit-and col 0xffffff)))
@@ -235,13 +244,13 @@
     (luminance
       [_] (luminance (as-rgba _)))
     (cyan
-      [_] (cyan (as-cmyk _)))
+      [_] (cyan (as-cmyka _)))
     (magenta
-      [_] (magenta (as-cmyk _)))
+      [_] (magenta (as-cmyka _)))
     (yellow
-      [_] (yellow (as-cmyk _)))
+      [_] (yellow (as-cmyka _)))
     (black
-      [_] (black (as-cmyk _)))
+      [_] (black (as-cmyka _)))
     IColorOps
     (rotate-hue
       [_ theta] (-> _ (as-hsva) (rotate-hue theta) (as-int24)))
@@ -254,10 +263,13 @@
     (invert
       [_] (Int24. (bit-xor col 0xffffff))))
 
-  (deftype Int32 [^int col]
+  (deftype Int32 [^long col]
     Object
     (toString
       [_] (str ns-prefix "Int32 [" col "]"))
+    IUnwrap
+    (unwrap
+      [_] col)
     IRGBConvert
     (as-rgba
       [_]
@@ -273,8 +285,8 @@
     (as-hsla
       [_] (as-hsla (as-rgba _)))
     ICMYKConvert
-    (as-cmyk
-      [_] (as-cmyk (as-rgba _)))
+    (as-cmyka
+      [_] (as-cmyka (as-rgba _)))
     ICSSConvert
     (as-css
       [_] (as-css (as-rgba _)))
@@ -300,13 +312,13 @@
     (luminance
       [_] (luminance (as-rgba _)))
     (cyan
-      [_] (cyan (as-cmyk _)))
+      [_] (cyan (as-cmyka _)))
     (magenta
-      [_] (magenta (as-cmyk _)))
+      [_] (magenta (as-cmyka _)))
     (yellow
-      [_] (yellow (as-cmyk _)))
+      [_] (yellow (as-cmyka _)))
     (black
-      [_] (black (as-cmyk _)))
+      [_] (black (as-cmyka _)))
     IColorOps
     (rotate-hue
       [_ theta] (-> _ (as-hsva) (rotate-hue theta) (as-int32)))
@@ -330,6 +342,9 @@
     Object
     (toString
       [_] (str ns-prefix "HSVA [" h " " s " " v " " a "]"))
+    IUnwrap
+    (unwrap
+      [_] [h s v a])
     IRGBConvert
     (as-rgba
       [_]
@@ -354,8 +369,8 @@
     (as-hsla
       [_] (as-hsla (as-rgba _)))
     ICMYKConvert
-    (as-cmyk
-      [_] (as-cmyk (as-rgba _)))
+    (as-cmyka
+      [_] (as-cmyka (as-rgba _)))
     ICSSConvert
     (as-css
       [_] (as-css (as-hsla (as-rgba _))))
@@ -405,6 +420,9 @@
     Object
     (toString
       [_] (str ns-prefix "HSVA [" h " " s " " l " " a "]"))
+    IUnwrap
+    (unwrap
+      [_] [h s l a])
     IRGBConvert
     (as-rgba
       [_]
@@ -423,8 +441,8 @@
     IHSLConvert
     (as-hsla [_] _)
     ICMYKConvert
-    (as-cmyk
-      [_] (as-cmyk (as-rgba _)))
+    (as-cmyka
+      [_] (as-cmyka (as-rgba _)))
     ICSSConvert
     (as-css
       [_]
@@ -481,6 +499,9 @@
     Object
     (toString
       [_] (str ns-prefix "CMYKA [" c " " m " " y " " k " " a "]"))
+    IUnwrap
+    (unwrap
+      [_] [c m y k a])
     IRGBConvert
     (as-rgba
       [_]
@@ -496,7 +517,7 @@
     (as-hsla
       [_] (as-hsla (as-rgba _)))
     ICMYKConvert
-    (as-cmyk [_] _)
+    (as-cmyka [_] _)
     ICSSConvert
     (as-css
       [_] (as-css (as-rgba _)))
@@ -531,11 +552,11 @@
       [_] k)
     IColorOps
     (rotate-hue
-      [_ theta] (-> _ (as-hsva) (rotate-hue theta) (as-cmyk)))
+      [_ theta] (-> _ (as-hsva) (rotate-hue theta) (as-cmyka)))
     (adjust-saturation
-      [_ offset] (-> _ (as-hsva) (adjust-saturation offset) (as-cmyk)))
+      [_ offset] (-> _ (as-hsva) (adjust-saturation offset) (as-cmyka)))
     (adjust-brightness
-      [_ offset] (-> _ (as-hsva) (adjust-brightness offset) (as-cmyk)))
+      [_ offset] (-> _ (as-hsva) (adjust-brightness offset) (as-cmyka)))
     (adjust-alpha
       [_ offset] (CMYKA. c m y k (m/clamp (+ offset a) 0.0 1.0)))
     (invert
@@ -549,6 +570,9 @@
     Object
     (toString
       [_] (str ns-prefix "CSS [\"" col "\"]"))
+    IUnwrap
+    (unwrap
+      [_] col)
     IRGBConvert
     (as-rgba
       [_]
@@ -563,8 +587,8 @@
       (let [c (parse-css col)]
         (if (instance? HSLA c) c (as-hsla c))))
     ICMYKConvert
-    (as-cmyk
-      [_] (as-cmyk (as-rgba _)))
+    (as-cmyka
+      [_] (as-cmyka (as-rgba _)))
     ICSSConvert
     (as-css
       [_] _)
@@ -618,6 +642,12 @@
     [to-rgba from-rgba]
     (fn ctor [col]
       (reify
+        Object
+        (toString
+          [_] (pr-str col))
+        IUnwrap
+        (unwrap
+          [_] col)
         IRGBConvert
         (as-rgba [_] (to-rgba col))
         IHSVConvert
@@ -627,8 +657,8 @@
         (as-hsla
           [_] (as-hsla (to-rgba col)))
         ICMYKConvert
-        (as-cmyk
-          [_] (as-cmyk (to-rgba col)))
+        (as-cmyka
+          [_] (as-cmyka (to-rgba col)))
         ICSSConvert
         (as-css
           [_] (as-css (to-rgba col)))
