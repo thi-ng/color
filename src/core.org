@@ -147,19 +147,19 @@
       (int24
        (bit-or
         (bit-or
-         (-> r (* 0xff) int (bit-shift-left 16))
-         (-> g (* 0xff) int (bit-shift-left 8)))
-        (-> b (* 0xff) int))))
+         (-> r (* 0xff) (+ 0.5) int (bit-shift-left 16))
+         (-> g (* 0xff) (+ 0.5) int (bit-shift-left 8)))
+        (-> b (* 0xff) (+ 0.5) int))))
     (as-int32
       [_]
       (int32
        (bit-or
         (bit-or
          (bit-or
-          (-> r (* 0xff) int (bit-shift-left 16))
-          (-> g (* 0xff) int (bit-shift-left 8)))
-         (-> b (* 0xff) int))
-        (bit-shift-left (int (* a 0xff)) 24))))
+          (-> r (* 0xff) (+ 0.5) int (bit-shift-left 16))
+          (-> g (* 0xff) (+ 0.5) int (bit-shift-left 8)))
+         (-> b (* 0xff) (+ 0.5) int))
+        (-> a (* 0xff) (+ 0.5) int (bit-shift-left 24)))))
     IColorComponents
     (red [_] r)
     (green [_] g)
@@ -278,9 +278,9 @@
         (Int24.
          (bit-or
           (bit-or
-           (bit-shift-left (int (mm/mix r (* (red dest) 0xff) t)) 16)
-           (bit-shift-left (int (mm/mix g (* (green dest) 0xff) t)) 8))
-          (int (mm/mix b (* (blue dest) 0xff) t)))))))
+           (bit-shift-left (int (mm/mix r (+ (* (red dest) 0xff) 0.5) t)) 16)
+           (bit-shift-left (int (mm/mix g (+ (* (green dest) 0xff) 0.5) t)) 8))
+          (int (mm/mix b (+ (* (blue dest) 0xff) 0.5) t)))))))
 
   (deftype Int32 #?(:clj [^long col] :cljs [col])
     <<deref(val="col")>>
@@ -363,10 +363,10 @@
          (bit-or
           (bit-or
            (bit-or
-            (bit-shift-left (int (mm/mix r (* (red dest) 0xff) t)) 16)
-            (bit-shift-left (int (mm/mix g (* (green dest) 0xff) t)) 8))
-           (int (mm/mix b (* (blue dest) 0xff) t)))
-          (bit-shift-left (int (mm/mix a (* (alpha dest) 0xff) t)) 24))))))
+            (bit-shift-left (int (mm/mix r (+ (* (red dest) 0xff) 0.5) t)) 16)
+            (bit-shift-left (int (mm/mix g (+ (* (green dest) 0xff) 0.5) t)) 8))
+           (int (mm/mix b (+ (* (blue dest) 0xff) 0.5) t)))
+          (bit-shift-left (int (mm/mix a (+ (* (alpha dest) 0xff) 0.5) t)) 24))))))
 #+END_SRC
 
 *** HSVA
@@ -1128,7 +1128,7 @@
 
   (def ^:private hex6 ["#" (f/hex 6)])
 
-  (def ns-prefix "#thi.ng.color.core.")
+  (def ^:private ns-prefix "#thi.ng.color.core.")
 #+END_SRC
 
 ** Complete namespace definition
