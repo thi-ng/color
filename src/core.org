@@ -14,6 +14,7 @@
          - [[#generic-color-space-support-proxy][Generic color space support proxy]]
          - [[#clojure-print-methods][Clojure print methods]]
          - [[#constructors][Constructors]]
+         - [[#primary-presets][Primary presets]]
      - [[#proxied-color-types][Proxied color types]]
      - [[#color-space--format-conversion-helpers][Color space & format conversion helpers]]
      - [[#hue-matching][Hue matching]]
@@ -205,7 +206,7 @@
 *** Packed RGB(A) ints
 
 #+BEGIN_SRC clojure :noweb-ref impl :noweb yes
-  (deftype Int24 [^int col]
+  (deftype Int24 #?(:clj [^int col] :cljs [col])
     <<deref(val="col")>>
     Object
     (toString
@@ -281,7 +282,7 @@
            (bit-shift-left (int (mm/mix g (* (green dest) 0xff) t)) 8))
           (int (mm/mix b (* (blue dest) 0xff) t)))))))
 
-  (deftype Int32 [^long col]
+  (deftype Int32 #?(:clj [^long col] :cljs [col])
     <<deref(val="col")>>
     Object
     (toString
@@ -449,17 +450,17 @@
       [_] (HSVA. (mod (+ 0.5 h) 1.0) (- 1.0 s) (- 1.0 v) a))
     (blend
       [_ dest t]
-      (let [h2 (hue dest)
+      (let [[h2 s2 v2 a2] @(as-hsva dest)
             hd (m/abs-diff h h2)]
         (HSVA.
          (if (> hd 0.5)
-           (if (> h2 h1)
+           (if (> h2 h)
              (rem (mm/mix (inc h) h2 t) 1.0)
              (rem (mm/mix h (inc h2) t) 1.0))
            (mm/mix h h2 t))
-         (mm/mix s (saturation dest) t)
-         (mm/mix v (brightness dest) t)
-         (mm/mix a (alpha dest) t)))))
+         (mm/mix s s2 t)
+         (mm/mix v v2 t)
+         (mm/mix a a2 t)))))
 #+END_SRC
 
 *** HSLA
@@ -543,17 +544,17 @@
       [_] (HSLA. (mod (+ 0.5 h) 1.0) (- 1.0 s) (- 1.0 l) a))
     (blend
       [_ dest t]
-      (let [h2 (hue dest)
+      (let [[h2 s2 l2 a2] @(as-hsla dest)
             hd (m/abs-diff h h2)]
         (HSLA.
          (if (> hd 0.5)
-           (if (> h2 h1)
+           (if (> h2 h)
              (rem (mm/mix (inc h) h2 t) 1.0)
              (rem (mm/mix h (inc h2) t) 1.0))
            (mm/mix h h2 t))
-         (mm/mix s (saturation dest) t)
-         (mm/mix l (luminance dest) t)
-         (mm/mix a (alpha dest) t)))))
+         (mm/mix s s2 t)
+         (mm/mix l l2 t)
+         (mm/mix a a2 t)))))
 #+END_SRC
 
 *** CMYK
@@ -706,7 +707,7 @@
     (invert
       [_] (-> _ (as-rgba) (invert) (as-css)))
     (blend
-      [_ dest t] (as-css (blend (as-rgba _) dest t))))
+      [_ dest t] (-> _ (as-rgba) (blend dest t) (as-css))))
 #+END_SRC
 
 *** Generic color space support proxy
@@ -839,6 +840,20 @@
 
   (defn css
     [^String col] (CSS. col))
+#+END_SRC
+
+*** Primary presets
+
+#+BEGIN_SRC clojure :noweb-ref ctors
+  (def RED     (rgba 1 0 0 1))
+  (def GREEN   (rgba 0 1 0 1))
+  (def BLUE    (rgba 0 0 1 1))
+  (def CYAN    (rgba 0 1 1 1))
+  (def MAGENTA (rgba 1 0 1 1))
+  (def YELLOW  (rgba 1 1 0 1))
+  (def BLACK   (rgba 0 0 0 1))
+  (def WHITE   (rgba 1 1 1 1))
+  (def GRAY    (rgba 0.5 0.5 0.5 1))
 #+END_SRC
 
 ** Proxied color types
@@ -1077,7 +1092,7 @@
     "Returns new color of same type with its hue rotated and adjusted
     saturation & brightness within given tolerances (+/-)."
     [col theta sat bright]
-    (analog
+    (analog col
      (* (m/randnorm) theta)
      (* (m/randnorm) sat)
      (* (m/randnorm) bright)))
