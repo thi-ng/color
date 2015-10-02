@@ -78,7 +78,7 @@ compatible with Clojure versions < 1.7.0**
 
 ** Status
 
-STABLE & under regular development
+STABLE & under regular development, 150+ tests
 
 *Note: That version 1.0.0 constitutes a complete rewrite with a new
  architecture and is not compatible with earlier versions!*
@@ -112,8 +112,8 @@ STABLE & under regular development
   ;; "#ffff00"
 
   ;; create controlled color variations (e.g. to create hover state colors)
-  @(-> (col/rgba 1 0 0.25) (col/analog 0.0 -0.2 0.4) col/as-css)
-  "#ff3366"
+  @(-> (col/css "#f04") (col/analog 0.0 -0.2 0.4) col/as-int24 col/as-css)
+  "#ff3369"
 
   @(-> (col/rgba 1 0 0.25 0.8) (col/random-analog 0.05 0.1 0.2) col/as-css)
   ;; "rgba(255,8,63,0.8)"
@@ -143,7 +143,7 @@ STABLE & under regular development
 ** Injected properties                                             :noexport:
 
 #+BEGIN_SRC clojure :noweb-ref version
-1.0.0-SNAPSHOT
+1.0.0
 #+END_SRC
 
 #+BEGIN_SRC clojure :exports none :noweb-ref project-url
