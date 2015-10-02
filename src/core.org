@@ -840,6 +840,9 @@
 
   (defn css
     [^String col] (CSS. col))
+
+  (defn random-rgb
+    [] (rgba (m/random) (m/random) (m/random) 1.0))
 #+END_SRC
 
 *** Primary presets
@@ -1100,21 +1103,23 @@
   (defn dist-rgb
     "Returns RGB distance of any two colors"
     [a b]
-    (let [dr (- (red a) (red b))
-          dg (- (green a) (green b))
-          db (- (blue a) (blue b))]
+    (let [[ra ga ba] @(as-rgba a)
+          [rb gb bb] @(as-rgba b)
+          dr (- ra rb)
+          dg (- ga gb)
+          db (- ba bb)]
       (Math/sqrt (mm/madd dr dr dg dg db db))))
 
   (defn dist-hsv
     "Returns HSV distance of any two colors"
     [a b]
-    (let [ha (* TWO_PI (hue a))
-          hb (* TWO_PI (hue b))
-          sa (saturation a)
-          sb (saturation b)
+    (let [[ha sa va] @(as-hsva a)
+          [hb sb vb] @(as-hsva b)
+          ha (* TWO_PI ha)
+          hb (* TWO_PI hb)
           dh (- (* sa (Math/cos ha)) (* sb (Math/cos hb)))
           ds (- (* sa (Math/sin ha)) (* sb (Math/sin hb)))
-          dv (- (brightness a) (brightness b))]
+          dv (- va vb)]
       (Math/sqrt (mm/madd dh dh ds ds dv dv))))
 #+END_SRC
 
