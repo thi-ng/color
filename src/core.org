@@ -18,7 +18,6 @@
      - [[#color-space--format-conversion-helpers][Color space & format conversion helpers]]
      - [[#hue-matching][Hue matching]]
      - [[#color-operations][Color operations]]
-         - [[#blending][Blending]]
      - [[#constants][Constants]]
      - [[#complete-namespace-definition][Complete namespace definition]]
 
@@ -65,7 +64,8 @@
     (adjust-saturation [_ offset])
     (adjust-brightness [_ offset])
     (adjust-alpha [_ offset])
-    (invert [_]))
+    (invert [_])
+    (blend [_ dest t]))
 #+END_SRC
 
 ** Color types & conversions
@@ -192,7 +192,14 @@
     (adjust-alpha
       [_ offset] (RGBA. r g b (m/clamp (+ a offset) 0.0 1.0)))
     (invert
-      [_] (RGBA. (- 1.0 r) (- 1.0 g) (- 1.0 b) a)))
+      [_] (RGBA. (- 1.0 r) (- 1.0 g) (- 1.0 b) a))
+    (blend
+      [_ dest t]
+      (RGBA.
+       (mm/mix r (red dest) t)
+       (mm/mix g (green dest) t)
+       (mm/mix b (blue dest) t)
+       (mm/mix a (alpha dest) t))))
 #+END_SRC
 
 *** Packed RGB(A) ints
@@ -261,7 +268,18 @@
     (adjust-alpha
       [_ offset] (adjust-alpha (as-int32 _) offset))
     (invert
-      [_] (Int24. (bit-xor col 0xffffff))))
+      [_] (Int24. (bit-xor col 0xffffff)))
+    (blend
+      [_ dest t]
+      (let [r (bit-and (bit-shift-right col 16) 0xff)
+            g (bit-and (bit-shift-right col 8) 0xff)
+            b (bit-and col 0xff)]
+        (Int24.
+         (bit-or
+          (bit-or
+           (bit-shift-left (int (mm/mix r (* (red dest) 0xff) t)) 16)
+           (bit-shift-left (int (mm/mix g (* (green dest) 0xff) t)) 8))
+          (int (mm/mix b (* (blue dest) 0xff) t)))))))
 
   (deftype Int32 [^long col]
     <<deref(val="col")>>
@@ -333,7 +351,21 @@
             a (int (* 0xff (m/clamp (+ a offset) 0.0 1.0)))]
         (Int32. (bit-or (bit-and col 0xffffff) (bit-shift-left a 24)))))
     (invert
-      [_] (Int32. (bit-xor col 0xffffff))))
+      [_] (Int32. (bit-xor col 0xffffff)))
+    (blend
+      [_ dest t]
+      (let [r (bit-and (bit-shift-right col 16) 0xff)
+            g (bit-and (bit-shift-right col 8) 0xff)
+            b (bit-and col 0xff)
+            a (unsigned-bit-shift-right col 24)]
+        (Int32.
+         (bit-or
+          (bit-or
+           (bit-or
+            (bit-shift-left (int (mm/mix r (* (red dest) 0xff) t)) 16)
+            (bit-shift-left (int (mm/mix g (* (green dest) 0xff) t)) 8))
+           (int (mm/mix b (* (blue dest) 0xff) t)))
+          (bit-shift-left (int (mm/mix a (* (alpha dest) 0xff) t)) 24))))))
 #+END_SRC
 
 *** HSVA
@@ -414,7 +446,20 @@
     (adjust-alpha
       [_ offset] (HSVA. h s v (m/clamp (+ offset a) 0.0 1.0)))
     (invert
-      [_] (HSVA. (mod (+ 0.5 h) 1.0) (- 1.0 s) (- 1.0 v) a)))
+      [_] (HSVA. (mod (+ 0.5 h) 1.0) (- 1.0 s) (- 1.0 v) a))
+    (blend
+      [_ dest t]
+      (let [h2 (hue dest)
+            hd (m/abs-diff h h2)]
+        (HSVA.
+         (if (> hd 0.5)
+           (if (> h2 h1)
+             (rem (mm/mix (inc h) h2 t) 1.0)
+             (rem (mm/mix h (inc h2) t) 1.0))
+           (mm/mix h h2 t))
+         (mm/mix s (saturation dest) t)
+         (mm/mix v (brightness dest) t)
+         (mm/mix a (alpha dest) t)))))
 #+END_SRC
 
 *** HSLA
@@ -495,7 +540,20 @@
     (adjust-alpha
       [_ offset] (HSLA. h s l (m/clamp (+ offset a) 0.0 1.0)))
     (invert
-      [_] (HSLA. (mod (+ 0.5 h) 1.0) (- 1.0 s) (- 1.0 l) a)))
+      [_] (HSLA. (mod (+ 0.5 h) 1.0) (- 1.0 s) (- 1.0 l) a))
+    (blend
+      [_ dest t]
+      (let [h2 (hue dest)
+            hd (m/abs-diff h h2)]
+        (HSLA.
+         (if (> hd 0.5)
+           (if (> h2 h1)
+             (rem (mm/mix (inc h) h2 t) 1.0)
+             (rem (mm/mix h (inc h2) t) 1.0))
+           (mm/mix h h2 t))
+         (mm/mix s (saturation dest) t)
+         (mm/mix l (luminance dest) t)
+         (mm/mix a (alpha dest) t)))))
 #+END_SRC
 
 *** CMYK
@@ -564,7 +622,15 @@
     (adjust-alpha
       [_ offset] (CMYKA. c m y k (m/clamp (+ offset a) 0.0 1.0)))
     (invert
-      [_] (CMYKA. (- 1.0 c) (- 1.0 m) (- 1.0 y) (- 1.0 k) a)))
+      [_] (CMYKA. (- 1.0 c) (- 1.0 m) (- 1.0 y) (- 1.0 k) a))
+    (blend
+      [_ dest t]
+      (CMYKA.
+       (mm/mix c (cyan dest) t)
+       (mm/mix m (magenta dest) t)
+       (mm/mix y (yellow dest) t)
+       (mm/mix k (black dest) t)
+       (mm/mix a (alpha dest) t))))
 #+END_SRC
 
 *** CSS
@@ -598,11 +664,11 @@
     (as-int24
       [_]
       (let [c (parse-css col)]
-          (if (instance? Int24 c) c (as-int24 c))))
+        (if (instance? Int24 c) c (as-int24 c))))
     (as-int32
       [_]
       (let [c (parse-css col)]
-          (if (instance? Int32 c) c (as-int32 c))))
+        (if (instance? Int32 c) c (as-int32 c))))
     IColorComponents
     (red
       [_] (red (as-rgba _)))
@@ -638,7 +704,9 @@
     (adjust-alpha
       [_ offset] (-> _ (as-rgba) (adjust-alpha offset) (as-css)))
     (invert
-      [_] (-> _ (as-rgba) (invert) (as-css))))
+      [_] (-> _ (as-rgba) (invert) (as-css)))
+    (blend
+      [_ dest t] (as-css (blend (as-rgba _) dest t))))
 #+END_SRC
 
 *** Generic color space support proxy
@@ -698,13 +766,15 @@
           [_] (black (to-rgba col)))
         IColorOps
         (rotate-hue
-          [_ theta] (-> col (to-rgba) (rotate-hue theta) (ctor (from-rgba))))
+          [_ theta] (-> col (to-rgba) (rotate-hue theta) (from-rgba) (ctor)))
         (adjust-saturation
-          [_ offset] (-> col (to-rgba) (adjust-saturation offset) (ctor (from-rgba))))
+          [_ offset] (-> col (to-rgba) (adjust-saturation offset) (from-rgba) (ctor)))
         (adjust-brightness
-          [_ offset] (-> col (to-rgba) (adjust-brightness offset) (ctor (from-rgba))))
+          [_ offset] (-> col (to-rgba) (adjust-brightness offset) (from-rgba) (ctor)))
         (invert
-          [_] (-> _ (to-rgba) (invert) (ctor (from-rgba)))))))
+          [_] (-> _ (to-rgba) (invert) (ctor (from-rgba))))
+        (blend
+          [_ dest t] (-> _ (to-rgba) (blend dest t) (from-rgba) (ctor))))))
 #+END_SRC
 
 *** Clojure print methods
@@ -784,6 +854,8 @@
   (def yuva (proxied-color-type yuva->rgba rgba->yuva))
 
   (def ycbcra (proxied-color-type ycbcra->rgba rgba->ycbcra))
+
+  (def cie1931 (proxied-color-type cie1931->rgb err/unsupported!))
 #+END_SRC
 
 ** Color space & format conversion helpers
@@ -992,6 +1064,24 @@
     "Returns new color of same type with its hue rotated by 180 degrees."
     [col] (rotate-hue col PI))
 
+  (defn analog
+    "Returns new color of same type with its hue rotated and adjusted
+    saturation & brightness."
+    [col theta sat bright]
+    (-> col
+        (rotate-hue theta)
+        (adjust-saturation sat)
+        (adjust-brightness bright)))
+
+  (defn random-analog
+    "Returns new color of same type with its hue rotated and adjusted
+    saturation & brightness within given tolerances (+/-)."
+    [col theta sat bright]
+    (analog
+     (* (m/randnorm) theta)
+     (* (m/randnorm) sat)
+     (* (m/randnorm) bright)))
+
   (defn dist-rgb
     "Returns RGB distance of any two colors"
     [a b]
@@ -1011,41 +1101,6 @@
           ds (- (* sa (Math/sin ha)) (* sb (Math/sin hb)))
           dv (- (brightness a) (brightness b))]
       (Math/sqrt (mm/madd dh dh ds ds dv dv))))
-#+END_SRC
-
-*** Blending
-
-#+BEGIN_SRC clojure :noweb-ref ops
-  (defn blend-rgb
-    [rgb1 rgb2 t]
-    [(mm/mix (first rgb1) (first rgb2) t)
-     (mm/mix (nth rgb1 1) (nth rgb2 1) t)
-     (mm/mix (nth rgb1 2) (nth rgb2 2) t)])
-
-  (defn blend-hsv
-    [hsv1 hsv2 t]
-    [(let [h1 (first hsv1)
-           h2 (first hsv2)
-           hd (m/abs-diff h1 h2)]
-       (if (> hd 0.5)
-         (if (> h2 h1)
-           (rem (mm/mix (inc h1) h2 t) 1.0)
-           (rem (mm/mix h1 (inc h2) t) 1.0))
-         (mm/mix h1 h2 t)))
-     (mm/mix (nth hsv1 1) (nth hsv2 1) t)
-     (mm/mix (nth hsv1 2) (nth hsv2 2) t)])
-
-  (defn blend-rgba
-    [[dr dg db da] [sr sg sb sa]]
-    (let [sa (or sa 1.0)
-          da (or da 1.0)
-          da' (mm/subm 1.0 sa da)
-          a'  (+ sa da')
-          ia' (/ 1.0 a')]
-      [(* ia' (mm/madd sr sa dr da'))
-       (* ia' (mm/madd sg sa dg da'))
-       (* ia' (mm/madd sb sa db da'))
-       a']))
 #+END_SRC
 
 ** Constants
