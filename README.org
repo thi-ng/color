@@ -1,10 +1,14 @@
-#+SETUPFILE: setup.org
+#+SETUPFILE: src/setup.org
 #+TITLE: thi.ng/color
+
+[[http://media.thi.ng/color/presets/rainbow1.svg]]
 
 * Contents                                                         :toc_3_gh:
  - [[#about-the-project][About the project]]
      - [[#overview][Overview]]
+     - [[#leiningen-coordinates][Leiningen coordinates]]
      - [[#status][Status]]
+     - [[#example-usage][Example usage]]
  - [[#namespaces][Namespaces]]
  - [[#tests][Tests]]
  - [[#project-definition][Project definition]]
@@ -29,27 +33,101 @@
 ** Overview
 
 Cross-platform CLJ/CLJS library for color conversion & manipulation.
-The library supports the following color spaces: RGB, HSV, HSL, HCY,
-HCV, CMYK, CIE1931. In addition conversion to/from CSS colors is
-supported.
+The library supports any-to-any conversions and color manipulations for the
+following color spaces:
 
-The current set of color operations includes:
+- RGBA (floats, packed int24/int32)
+- HSVA
+- HSLA
+- CMYKA
+- HCYA
+- HCVA
+- CIE1931A
+- CSS(A) (hex 3/6-digit & long forms)
 
+The library also provides a protocol wrapper for other, user supplied
+color spaces to proxy all operations via intermediate RGBA conversions.
+Users will only need to provide two functions to convert from/to RGBA.
+
+All color types are completely protocol based with optimized
+implementations for each. The current set of color operations
+includes:
+
+- channel accessors for all supported color spaces
 - hue rotation
 - brightness/saturation/alpha adjustments
-- complementary/inverse colors
+- analog/complementary/inverse colors
 - hue matching
-- blending (with & without alpha)
+- blending
 - distance calculations in RGB/HSV
 
 Furthermore the library includes namespaces to generate procedural
-gradients and features 100+ CSS named color presets as well as D3's &
-Cynthia Brewer's categorical color schemes originally intented for geo
-mapping and other data visualization applications.
+gradients and features 100+ CSS named color & gradient presets as well
+as D3's & Cynthia Brewer's categorical color schemes originally
+intented for geo mapping and other data visualization applications.
+
+** Leiningen coordinates
+
+#+BEGIN_SRC clojure
+[thi.ng/color "1.0.0"]
+#+END_SRC
+
+*Note:* This library relies on the new conditional reader syntax of
+recent Clojure & Clojurescript versions and therefore is **not
+compatible with Clojure versions < 1.7.0**
 
 ** Status
 
 STABLE & under regular development
+
+*Note: That version 1.0.0 constitutes a complete rewrite with a new
+ architecture and is not compatible with earlier versions!*
+
+** Example usage
+
+#+BEGIN_SRC clojure
+  (require '[thi.ng.color.core :as col])
+
+  (col/rgba 1 0 0 0.5)
+  ;; #thi.ng.color.core.RGBA [1.0 0.0 0.0 0.5]
+
+  (col/hsva 0.5 1 1)
+  ;; #thi.ng.color.core.HSVA [0.5 1.0 1.0 1.0]
+
+  (col/as-cmyka (col/hsva 0.5 1 1))
+  ;; #thi.ng.color.core.CMYKA [1.0 0.0 0.0 0.0 1.0]
+
+  ;; use deref to obtain the wrapped color values
+  @(col/as-css (col/hsla 1/6 1 0.5 0.25))
+  ;; "hsla(60,100%,50%,0.25)"
+
+  ;; parse CSS colors into any target space
+  @(col/as-rgba (col/css "hsla(60,100%,50%,0.25)"))
+  ;; [0.9999999999999998 1.0 0.0 0.25]
+
+  (= 0xffff00 @(col/as-int24 (col/css "hsla(60,100%,50%,0.25)")))
+
+  ;; compact CSS colors
+  @(-> "hsla(60,100%,50%,0.25)" col/css col/as-int24 col/as-css)
+  ;; "#ffff00"
+
+  ;; create controlled color variations (e.g. to create hover state colors)
+  @(-> (col/rgba 1 0 0.25) (col/analog 0.0 -0.2 0.4) col/as-css)
+  "#ff3366"
+
+  @(-> (col/rgba 1 0 0.25 0.8) (col/random-analog 0.05 0.1 0.2) col/as-css)
+  ;; "rgba(255,8,63,0.8)"
+
+  ;; blend with any color space (result is in color space of first color)
+  (col/blend (col/hsva 0 1 1) (col/rgba 0 1 0 0.5) 0.5)
+  ;; #thi.ng.color.core.HSVA [0.16666666666666666 1.0 1.0 0.75]
+
+  ;; sort colors by proximity to a target color
+  (->> (repeatedly 10 col/random-rgb)
+       (sort-by #(col/dist-hsv col/RED %)) ;; use HSV distance
+       (map (comp deref col/as-css col/as-int24)))
+  ;; ("#d8756c" "#ca6709" "#f67e9c" "#bf984e" "#6e400d" "#d602af" "#c52fd2" "#93759d" "#3710d1" "#06a1c3")
+#+END_SRC
 
 * Namespaces
 
@@ -162,7 +240,7 @@ in the REPL via =(require 'thi.ng.color... :reload)= or similar.
 
 ** Leiningen project file                                          :noexport:
 
-#+BEGIN_SRC clojure :tangle ../babel/project.clj :noweb yes :mkdirp yes :padline no
+#+BEGIN_SRC clojure :tangle babel/project.clj :noweb yes :mkdirp yes :padline no
   (defproject thi.ng/color "<<version>>"
     :description  "Cross-platform CLJ/CLJS library for color conversion & manipulation."
     :url          "<<project-url>>"
@@ -202,7 +280,7 @@ in the REPL via =(require 'thi.ng.color... :reload)= or similar.
 
 ** ClojureScript HTML harness                                      :noexport:
 
-#+BEGIN_SRC html :tangle ../babel/index.html :noweb yes :mkdirp yes :padline no
+#+BEGIN_SRC html :tangle babel/index.html :noweb yes :mkdirp yes :padline no
   <!DOCTYPE html>
   <html lang="en">
     <head>
@@ -213,6 +291,7 @@ in the REPL via =(require 'thi.ng.color... :reload)= or similar.
     </body>
   </html>
 #+END_SRC
+
 ** Accessing library version during runtime
 
 The autogenerated namespace =thi.ng.color.version= contains a single
@@ -227,7 +306,7 @@ symbol =version= holding the version string defined above:
 
 *** Version namespace                                              :noexport:
 
-#+BEGIN_SRC clojure :tangle ../babel/src/thi/ng/color/version.cljc :noweb yes :mkdirp yes :padline no :exports none
+#+BEGIN_SRC clojure :tangle babel/src/thi/ng/color/version.cljc :noweb yes :mkdirp yes :padline no :exports none
   (ns thi.ng.color.version)
 
   (def version "<<version>>")
@@ -237,6 +316,7 @@ symbol =version= holding the version string defined above:
 
 | *Version* | *Released* | *Description*                                          | *Tagged Github URL* |
 |-----------+------------+--------------------------------------------------------+---------------------|
+|     1.0.0 | 2015-10-02 | complete rewrite using protocols                       | [[https://github.com/thi-ng/color/tree/1.0.0][1.0.0]]               |
 |     0.3.1 | 2015-06-21 | add YCbCr & YUV conversion, update deps                | [[https://github.com/thi-ng/color/tree/0.3.1][0.3.1]]               |
 |     0.3.0 | 2015-06-15 | gradient ns, HSL/HCY/HCV color space support, bugfixes | [[https://github.com/thi-ng/color/tree/0.3.0][0.3.0]]               |
 |     0.2.0 | 2015-05-26 | no more CLJX, CIE1931 color space support, doc updates | [[https://github.com/thi-ng/color/tree/0.2.0][0.2.0]]               |
