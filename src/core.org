@@ -842,6 +842,7 @@
     [^String col] (CSS. col))
 
   (defn random-rgb
+    "Returns a random RGBA color with 100% alpha"
     [] (rgba (m/random) (m/random) (m/random) 1.0))
 #+END_SRC
 

@@ -299,7 +299,7 @@ symbol =version= holding the version string defined above:
 
 #+BEGIN_SRC clojure :noweb yes
   (use '[thi.ng.color.version])
-  
+
   (prn version)
   ; "<<version>>"
 #+END_SRC
