@@ -131,13 +131,13 @@ STABLE & under regular development, 150+ tests
 
 * Namespaces
 
-- [[./core.org][thi.ng.color.core]]
-- [[./gradients.org][thi.ng.color.gradients]]
-- [[./presets.org][thi.ng.color.presets]]
+- [[./src/core.org][thi.ng.color.core]]
+- [[./src/gradients.org][thi.ng.color.gradients]]
+- [[./src/presets.org][thi.ng.color.presets]]
 
 * Tests
 
-- [[../test/core.org][thi.ng.color.test.core]]
+- [[./test/core.org][thi.ng.color.test.core]]
 
 * Project definition
 ** Injected properties                                             :noexport:
