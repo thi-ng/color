@@ -70,14 +70,15 @@
 #+END_SRC
 
 ** Color types & conversions
-
 *** Deref template
 
 #+NAME: deref
 #+BEGIN_SRC emacs-lisp :var val=""
-  (replace-regexp-in-string "{{val}}" val
-  "#?@(:clj [clojure.lang.IDeref (deref [_] {{val}})] :cljs [IDeref (-deref [_] {{val}})])")
+  (replace-regexp-in-string
+    "{{val}}" val
+    "#?@(:clj [clojure.lang.IDeref (deref [_] {{val}})] :cljs [IDeref (-deref [_] {{val}})])")
 #+END_SRC
+
 *** RGBA
 
 #+BEGIN_SRC clojure :noweb-ref impl :noweb yes
@@ -874,7 +875,7 @@
 
   (def ycbcra (proxied-color-type ycbcra->rgba rgba->ycbcra))
 
-  (def cie1931 (proxied-color-type cie1931->rgb err/unsupported!))
+  (def cie1931 (proxied-color-type cie1931->rgba err/unsupported!))
 #+END_SRC
 
 ** Color space & format conversion helpers
@@ -979,10 +980,11 @@
     ([y u v]
      (yuva->rgba y u v 1.0))
     ([y u v a]
-     [(m/clamp (mm/madd 1.13983 v y) 0.0 1.0)
+     (RGBA.
+      (m/clamp (mm/madd 1.13983 v y) 0.0 1.0)
       (m/clamp (- y (mm/madd 0.39465 u 0.5806 v)) 0.0 1.0)
       (m/clamp (mm/madd 2.03211 u y) 0.0 1.0)
-      a]))
+      a)))
 
   (defn- cie1931-gamma-correct
     [x]
@@ -992,16 +994,17 @@
        (mm/msub 1.055 (Math/pow x (/ 2.4)) 0.055))
      0.0 1.0))
 
-  (defn- cie1931->rgb
+  (defn- cie1931->rgba
     ([xyz]
-     (apply cie1931->rgb xyz))
+     (apply cie1931->rgba xyz))
     ([x y z]
-     (cie1931->rgb x y z 1.0))
+     (cie1931->rgba x y z 1.0))
     ([x y z a]
-     [(cie1931-gamma-correct (mm/madd 3.2406 x -1.5372 y -0.4986 z))
+     (RGBA.
+      (cie1931-gamma-correct (mm/madd 3.2406 x -1.5372 y -0.4986 z))
       (cie1931-gamma-correct (mm/madd -0.9689 x 1.8758 y 0.0415 z))
       (cie1931-gamma-correct (mm/madd 0.0557 x -0.2040 y 1.0570 z))
-      a]))
+      a)))
 
   (defn hex->int
     [hex]

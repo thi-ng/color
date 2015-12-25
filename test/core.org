@@ -137,6 +137,10 @@ clipped & signed 32bit test values...
 #+END_SRC
 
 #+BEGIN_SRC clojure :noweb-ref test
+  (deftest proxy-test) ;; TODO
+#+END_SRC
+
+#+BEGIN_SRC clojure :noweb-ref test
   (deftest channel-access
     (let [c1 (col/rgba 0.1 0.2 0.3 0.4)
           c2 (col/int24 0xff8040)
