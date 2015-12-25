@@ -316,6 +316,7 @@ symbol =version= holding the version string defined above:
 
 | *Version* | *Released* | *Description*                                          | *Tagged Github URL* |
 |-----------+------------+--------------------------------------------------------+---------------------|
+|     1.0.1 | 2015-12-25 | bugfix yuva & cie1931 rgba conversions                 | [[https://github.com/thi-ng/color/tree/1.0.1][1.0.1]]               |
 |     1.0.0 | 2015-10-02 | complete rewrite using protocols                       | [[https://github.com/thi-ng/color/tree/1.0.0][1.0.0]]               |
 |     0.3.1 | 2015-06-21 | add YCbCr & YUV conversion, update deps                | [[https://github.com/thi-ng/color/tree/0.3.1][0.3.1]]               |
 |     0.3.0 | 2015-06-15 | gradient ns, HSL/HCY/HCV color space support, bugfixes | [[https://github.com/thi-ng/color/tree/0.3.0][0.3.0]]               |
