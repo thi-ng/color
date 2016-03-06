@@ -64,9 +64,7 @@
     (rotate-hue [_ theta])
     (adjust-saturation [_ offset])
     (adjust-brightness [_ offset])
-    (adjust-alpha [_ offset])
-    (invert [_])
-    (blend [_ dest t]))
+    (adjust-alpha [_ offset]))
 #+END_SRC
 
 ** Color types & conversions
@@ -80,18 +78,17 @@
 #+END_SRC
 
 *** RGBA
-
 #+BEGIN_SRC clojure :noweb-ref impl :noweb yes
   (deftype RGBA [^double r ^double g ^double b ^double a]
     <<deref(val="[r g b a]")>>
     Object
     (toString
-      [_] (str ns-prefix "RGBA [" r " " g " " b " " a "]"))
+        [_] (str ns-prefix "RGBA [" r " " g " " b " " a "]"))
     IRGBConvert
     (as-rgba [_] _)
     IHSVConvert
     (as-hsva
-      [_]
+        [_]
       (let [v (max r g b)
             d (- v (min r g b))
             s (if (m/delta= 0.0 v) 0.0 (/ d v))
@@ -105,7 +102,7 @@
         (hsva (if (neg? h) (inc h) h) s v a)))
     IHSLConvert
     (as-hsla
-      [_]
+        [_]
       (let [f1 (min r g b)
             f2 (max r g b)
             l  (mm/addm f1 f2 0.5)
@@ -125,7 +122,7 @@
             (hsla h s l a)))))
     ICMYKConvert
     (as-cmyka
-      [_]
+        [_]
       (let [c (- 1.0 r)
             m (- 1.0 g)
             y (- 1.0 b)
@@ -137,14 +134,14 @@
          (max k 0.0))))
     ICSSConvert
     (as-css
-      [_]
+        [_]
       (if (< a 1.0)
         (let [r (* 0xff r) g (* 0xff g) b (* 0xff b)]
           (css (str "rgba(" (int r) \, (int g) \, (int b) \, (max 0.0 a) ")")))
         (as-css (as-int24 _))))
     IIntConvert
     (as-int24
-      [_]
+        [_]
       (int24
        (bit-or
         (bit-or
@@ -152,7 +149,7 @@
          (-> g (* 0xff) (+ 0.5) int (bit-shift-left 8)))
         (-> b (* 0xff) (+ 0.5) int))))
     (as-int32
-      [_]
+        [_]
       (int32
        (bit-or
         (bit-or
@@ -167,54 +164,56 @@
     (blue [_] b)
     (alpha [_] a)
     (hue
-      [_] (hue (as-hsva _)))
+        [_] (hue (as-hsva _)))
     (saturation
-      [_]
+        [_]
       (let [v (max r g b)]
         (if (m/delta= 0.0 v) 0.0 (/ (- v (min r g b)) v))))
     (brightness
-      [_] (max r g b))
+        [_] (max r g b))
     (luminance
-      [_] (mm/madd 0.299 r 0.587 g 0.114 b))
+        [_] (mm/madd 0.299 r 0.587 g 0.114 b))
     (cyan
-      [_] (cyan (as-cmyka _)))
+        [_] (cyan (as-cmyka _)))
     (magenta
-      [_] (magenta (as-cmyka _)))
+        [_] (magenta (as-cmyka _)))
     (yellow
-      [_] (yellow (as-cmyka _)))
+        [_] (yellow (as-cmyka _)))
     (black
-      [_] (black (as-cmyka _)))
+        [_] (black (as-cmyka _)))
     IColorOps
     (rotate-hue
-      [_ theta] (-> _ (as-hsva) (rotate-hue theta) (as-rgba)))
+        [_ theta] (-> _ (as-hsva) (rotate-hue theta) (as-rgba)))
     (adjust-saturation
-      [_ offset] (-> _ (as-hsva) (adjust-saturation offset) (as-rgba)))
+        [_ offset] (-> _ (as-hsva) (adjust-saturation offset) (as-rgba)))
     (adjust-brightness
-      [_ offset] (-> _ (as-hsva) (adjust-brightness offset) (as-rgba)))
+        [_ offset] (-> _ (as-hsva) (adjust-brightness offset) (as-rgba)))
     (adjust-alpha
-      [_ offset] (RGBA. r g b (m/clamp (+ a offset) 0.0 1.0)))
+        [_ offset] (RGBA. r g b (m/clamp (+ a offset) 0.0 1.0)))
+    m/IInvert
     (invert
-      [_] (RGBA. (- 1.0 r) (- 1.0 g) (- 1.0 b) a))
-    (blend
-      [_ dest t]
-      (RGBA.
-       (mm/mix r (red dest) t)
-       (mm/mix g (green dest) t)
-       (mm/mix b (blue dest) t)
-       (mm/mix a (alpha dest) t))))
+        [_] (RGBA. (- 1.0 r) (- 1.0 g) (- 1.0 b) a))
+    m/IInterpolate
+    (mix
+        [_ dest t]
+      (let [^RGBA dest (as-rgba dest)]
+        (RGBA.
+         (mm/mix r (.-r dest) t)
+         (mm/mix g (.-g dest) t)
+         (mm/mix b (.-b dest) t)
+         (mm/mix a (.-a dest) t)))))
 #+END_SRC
 
 *** Packed RGB(A) ints
-
 #+BEGIN_SRC clojure :noweb-ref impl :noweb yes
   (deftype Int24 #?(:clj [^int col] :cljs [col])
     <<deref(val="col")>>
     Object
     (toString
-      [_] (str ns-prefix "Int24 [" col "]"))
+        [_] (str ns-prefix "Int24 [" col "]"))
     IRGBConvert
     (as-rgba
-      [_]
+        [_]
       (RGBA.
        (* INV8BIT (bit-and (bit-shift-right col 16) 0xff))
        (* INV8BIT (bit-and (bit-shift-right col 8) 0xff))
@@ -222,75 +221,78 @@
        1.0))
     IHSVConvert
     (as-hsva
-      [_] (as-hsva (as-rgba _)))
+        [_] (as-hsva (as-rgba _)))
     IHSLConvert
     (as-hsla
-      [_] (as-hsla (as-rgba _)))
+        [_] (as-hsla (as-rgba _)))
     ICMYKConvert
     (as-cmyka
-      [_] (as-cmyka (as-rgba _)))
+        [_] (as-cmyka (as-rgba _)))
     ICSSConvert
     (as-css
-      [_] (css (f/format hex6 (bit-and col 0xffffff))))
+        [_] (css (f/format hex6 (bit-and col 0xffffff))))
     IIntConvert
     (as-int24 [_] _)
     (as-int32
-      [_] (int32 (bit-or col 0xff000000)))
+        [_] (int32 (bit-or col 0xff000000)))
     IColorComponents
     (red
-      [_] (* INV8BIT (bit-and (bit-shift-right col 16) 0xff)))
+        [_] (* INV8BIT (bit-and (bit-shift-right col 16) 0xff)))
     (green
-      [_] (* INV8BIT (bit-and (bit-shift-right col 8) 0xff)))
+        [_] (* INV8BIT (bit-and (bit-shift-right col 8) 0xff)))
     (blue
-      [_] (* INV8BIT (bit-and col 0xff)))
+        [_] (* INV8BIT (bit-and col 0xff)))
     (alpha [_] 1)
     (hue
-      [_] (hue (as-hsva _)))
+        [_] (hue (as-hsva _)))
     (saturation
-      [_] (saturation (as-rgba _)))
+        [_] (saturation (as-rgba _)))
     (brightness
-      [_] (brightness (as-rgba _)))
+        [_] (brightness (as-rgba _)))
     (luminance
-      [_] (luminance (as-rgba _)))
+        [_] (luminance (as-rgba _)))
     (cyan
-      [_] (cyan (as-cmyka _)))
+        [_] (cyan (as-cmyka _)))
     (magenta
-      [_] (magenta (as-cmyka _)))
+        [_] (magenta (as-cmyka _)))
     (yellow
-      [_] (yellow (as-cmyka _)))
+        [_] (yellow (as-cmyka _)))
     (black
-      [_] (black (as-cmyka _)))
+        [_] (black (as-cmyka _)))
     IColorOps
     (rotate-hue
-      [_ theta] (-> _ (as-hsva) (rotate-hue theta) (as-int24)))
+        [_ theta] (-> _ (as-hsva) (rotate-hue theta) (as-int24)))
     (adjust-saturation
-      [_ offset] (-> _ (as-hsva) (adjust-saturation offset) (as-int24)))
+        [_ offset] (-> _ (as-hsva) (adjust-saturation offset) (as-int24)))
     (adjust-brightness
-      [_ offset] (-> _ (as-hsva) (adjust-brightness offset) (as-int24)))
+        [_ offset] (-> _ (as-hsva) (adjust-brightness offset) (as-int24)))
     (adjust-alpha
-      [_ offset] (adjust-alpha (as-int32 _) offset))
+        [_ offset] (adjust-alpha (as-int32 _) offset))
+    m/IInvert
     (invert
-      [_] (Int24. (bit-xor col 0xffffff)))
-    (blend
-      [_ dest t]
+        [_] (Int24. (bit-xor col 0xffffff)))
+    m/IInterpolate
+    (mix
+        [_ dest t]
       (let [r (bit-and (bit-shift-right col 16) 0xff)
             g (bit-and (bit-shift-right col 8) 0xff)
-            b (bit-and col 0xff)]
+            b (bit-and col 0xff)
+            ^RGBA dest (as-rgba dest)]
         (Int24.
          (bit-or
           (bit-or
-           (bit-shift-left (int (mm/mix r (+ (* (red dest) 0xff) 0.5) t)) 16)
-           (bit-shift-left (int (mm/mix g (+ (* (green dest) 0xff) 0.5) t)) 8))
-          (int (mm/mix b (+ (* (blue dest) 0xff) 0.5) t)))))))
+           (bit-shift-left (int (mm/mix r (+ (* (.-r dest) 0xff) 0.5) t)) 16)
+           (bit-shift-left (int (mm/mix g (+ (* (.-g dest) 0xff) 0.5) t)) 8))
+          (int (mm/mix b (+ (* (.-b dest) 0xff) 0.5) t)))))))
 
   (deftype Int32 #?(:clj [^long col] :cljs [col])
     <<deref(val="col")>>
     Object
     (toString
-      [_] (str ns-prefix "Int32 [" col "]"))
+        [_] (str ns-prefix "Int32 [" col "]"))
     IRGBConvert
     (as-rgba
-      [_]
+        [_]
       (RGBA.
        (* INV8BIT (bit-and (bit-shift-right col 16) 0xff))
        (* INV8BIT (bit-and (bit-shift-right col 8) 0xff))
@@ -298,76 +300,79 @@
        (* INV8BIT (bit-and (unsigned-bit-shift-right col 24) 0xff))))
     IHSVConvert
     (as-hsva
-      [_] (as-hsva (as-rgba _)))
+        [_] (as-hsva (as-rgba _)))
     IHSLConvert
     (as-hsla
-      [_] (as-hsla (as-rgba _)))
+        [_] (as-hsla (as-rgba _)))
     ICMYKConvert
     (as-cmyka
-      [_] (as-cmyka (as-rgba _)))
+        [_] (as-cmyka (as-rgba _)))
     ICSSConvert
     (as-css
-      [_]
+        [_]
       (if (== 0xff000000 (bit-and col 0xff000000))
         (css (f/format hex6 (bit-and col 0xffffff)))
         (as-css (as-rgba _))))
     IIntConvert
     (as-int24
-      [_] (Int24. (bit-and col 0xffffff)))
+        [_] (Int24. (bit-and col 0xffffff)))
     (as-int32 [_] _)
     IColorComponents
     (red
-      [_] (* INV8BIT (bit-and (bit-shift-right col 16) 0xff)))
+        [_] (* INV8BIT (bit-and (bit-shift-right col 16) 0xff)))
     (green
-      [_] (* INV8BIT (bit-and (bit-shift-right col 8) 0xff)))
+        [_] (* INV8BIT (bit-and (bit-shift-right col 8) 0xff)))
     (blue
-      [_] (* INV8BIT (bit-and col 0xff)))
+        [_] (* INV8BIT (bit-and col 0xff)))
     (alpha
-      [_] (* INV8BIT (bit-and (unsigned-bit-shift-right col 24) 0xff)))
+        [_] (* INV8BIT (bit-and (unsigned-bit-shift-right col 24) 0xff)))
     (hue
-      [_] (hue (as-hsva _)))
+        [_] (hue (as-hsva _)))
     (saturation
-      [_] (saturation (as-rgba _)))
+        [_] (saturation (as-rgba _)))
     (brightness
-      [_] (brightness (as-rgba _)))
+        [_] (brightness (as-rgba _)))
     (luminance
-      [_] (luminance (as-rgba _)))
+        [_] (luminance (as-rgba _)))
     (cyan
-      [_] (cyan (as-cmyka _)))
+        [_] (cyan (as-cmyka _)))
     (magenta
-      [_] (magenta (as-cmyka _)))
+        [_] (magenta (as-cmyka _)))
     (yellow
-      [_] (yellow (as-cmyka _)))
+        [_] (yellow (as-cmyka _)))
     (black
-      [_] (black (as-cmyka _)))
+        [_] (black (as-cmyka _)))
     IColorOps
     (rotate-hue
-      [_ theta] (-> _ (as-hsva) (rotate-hue theta) (as-int32)))
+        [_ theta] (-> _ (as-hsva) (rotate-hue theta) (as-int32)))
     (adjust-saturation
-      [_ offset] (-> _ (as-hsva) (adjust-saturation offset) (as-int32)))
+        [_ offset] (-> _ (as-hsva) (adjust-saturation offset) (as-int32)))
     (adjust-brightness
-      [_ offset] (-> _ (as-hsva) (adjust-brightness offset) (as-int32)))
+        [_ offset] (-> _ (as-hsva) (adjust-brightness offset) (as-int32)))
     (adjust-alpha
-      [_ offset]
+        [_ offset]
       (let [a (* INV8BIT (bit-and (unsigned-bit-shift-right col 24) 0xff))
             a (int (* 0xff (m/clamp (+ a offset) 0.0 1.0)))]
         (Int32. (bit-or (bit-and col 0xffffff) (bit-shift-left a 24)))))
+    m/IInvert
     (invert
-      [_] (Int32. (bit-xor col 0xffffff)))
-    (blend
-      [_ dest t]
+        [_] (Int32. (bit-xor col 0xffffff)))
+    m/IInterpolate
+    (mix
+        [_ dest t]
       (let [r (bit-and (bit-shift-right col 16) 0xff)
             g (bit-and (bit-shift-right col 8) 0xff)
             b (bit-and col 0xff)
-            a (unsigned-bit-shift-right col 24)]
+            a (unsigned-bit-shift-right col 24)
+            ^RGBA dest (as-rgba dest)]
         (Int32.
          (bit-or
           (bit-or
            (bit-or
-            (bit-shift-left (int (mm/mix r (+ (* (red dest) 0xff) 0.5) t)) 16)
-            (bit-shift-left (int (mm/mix g (+ (* (green dest) 0xff) 0.5) t)) 8))
-           (int (mm/mix b (+ (* (blue dest) 0xff) 0.5) t)))
-          (bit-shift-left (int (mm/mix a (+ (* (alpha dest) 0xff) 0.5) t)) 24))))))
+            (bit-shift-left (int (mm/mix r (+ (* (.-r dest) 0xff) 0.5) t)) 16)
+            (bit-shift-left (int (mm/mix g (+ (* (.-g dest) 0xff) 0.5) t)) 8))
+           (int (mm/mix b (+ (* (.-b dest) 0xff) 0.5) t)))
+          (bit-shift-left (int (mm/mix a (+ (* (.-a dest) 0xff) 0.5) t)) 24))))))
 #+END_SRC
 
 *** HSVA
@@ -379,10 +384,10 @@
     <<deref(val="[h s v a]")>>
     Object
     (toString
-      [_] (str ns-prefix "HSVA [" h " " s " " v " " a "]"))
+        [_] (str ns-prefix "HSVA [" h " " s " " v " " a "]"))
     IRGBConvert
     (as-rgba
-      [_]
+        [_]
       (if (m/delta= 0.0 s)
         (RGBA. v v v a)
         (let [h (rem (* h 6.0) 6.0)
@@ -402,56 +407,59 @@
     (as-hsva [_] _)
     IHSLConvert
     (as-hsla
-      [_]
+        [_]
       (let [l  (* (- 2 s) (* v 0.5))
-            s' (/ (* s v) (- 1 (m/abs (dec (* 2 l)))))]
+            s' (/ (* s v) (- 1 (m/abs* (dec (* 2 l)))))]
         (hsla h s' l a)))
     ICMYKConvert
     (as-cmyka
-      [_] (as-cmyka (as-rgba _)))
+        [_] (as-cmyka (as-rgba _)))
     ICSSConvert
     (as-css
-      [_] (as-css (as-hsla (as-rgba _))))
+        [_] (as-css (as-hsla (as-rgba _))))
     IIntConvert
     (as-int24 [_] (as-int24 (as-rgba _)))
     (as-int32 [_] (as-int32 (as-rgba _)))
     IColorComponents
     (red
-      [_] (red (as-rgba _)))
+        [_] (red (as-rgba _)))
     (green
-      [_] (green (as-rgba _)))
+        [_] (green (as-rgba _)))
     (blue
-      [_] (blue (as-rgba _)))
+        [_] (blue (as-rgba _)))
     (alpha [_] a)
     (hue [_] h)
     (saturation [_] s)
     (brightness [_] v)
     (luminance
-      [_] (luminance (as-rgba _)))
+        [_] (luminance (as-rgba _)))
     (cyan
-      [_] (cyan (as-rgba _)))
+        [_] (cyan (as-rgba _)))
     (magenta
-      [_] (magenta (as-rgba _)))
+        [_] (magenta (as-rgba _)))
     (yellow
-      [_] (yellow (as-rgba _)))
+        [_] (yellow (as-rgba _)))
     (black
-      [_] (black (as-rgba _)))
+        [_] (black (as-rgba _)))
     IColorOps
     (rotate-hue
-      [_ theta]
+        [_ theta]
       (let [h (+ h (/ (rem theta TWO_PI) TWO_PI))]
         (HSVA. (if (neg? h) (inc h) (if (>= h 1.0) (dec h) h)) s v a)))
     (adjust-saturation
-      [_ offset] (HSVA. h (m/clamp (+ offset s) 0.0 1.0) v a))
+        [_ offset] (HSVA. h (m/clamp (+ offset s) 0.0 1.0) v a))
     (adjust-brightness
-      [_ offset] (HSVA. h s (m/clamp (+ offset v) 0.0 1.0) a))
+        [_ offset] (HSVA. h s (m/clamp (+ offset v) 0.0 1.0) a))
     (adjust-alpha
-      [_ offset] (HSVA. h s v (m/clamp (+ offset a) 0.0 1.0)))
+        [_ offset] (HSVA. h s v (m/clamp (+ offset a) 0.0 1.0)))
+    m/IInvert
     (invert
-      [_] (HSVA. (mod (+ 0.5 h) 1.0) (- 1.0 s) (- 1.0 v) a))
-    (blend
-      [_ dest t]
-      (let [[h2 s2 v2 a2] @(as-hsva dest)
+        [_] (HSVA. (mod (+ 0.5 h) 1.0) (- 1.0 s) (- 1.0 v) a))
+    m/IInterpolate
+    (mix
+        [_ dest t]
+      (let [^HSVA dest (as-hsva dest)
+            h2 (.-h dest)
             hd (m/abs-diff h h2)]
         (HSVA.
          (if (> hd 0.5)
@@ -459,22 +467,21 @@
              (rem (mm/mix (inc h) h2 t) 1.0)
              (rem (mm/mix h (inc h2) t) 1.0))
            (mm/mix h h2 t))
-         (mm/mix s s2 t)
-         (mm/mix v v2 t)
-         (mm/mix a a2 t)))))
+         (mm/mix s (.-s dest) t)
+         (mm/mix v (.-v dest) t)
+         (mm/mix a (.-a dest) t)))))
 #+END_SRC
 
 *** HSLA
-
 #+BEGIN_SRC clojure :noweb-ref impl :noweb yes
   (deftype HSLA [^double h ^double s ^double l ^double a]
     <<deref(val="[h s l a]")>>
     Object
     (toString
-      [_] (str ns-prefix "HSLA [" h " " s " " l " " a "]"))
+        [_] (str ns-prefix "HSLA [" h " " s " " l " " a "]"))
     IRGBConvert
     (as-rgba
-      [_]
+        [_]
       (if (m/delta= 0.0 s)
         (RGBA. l l l a)
         (let [f2 (if (< l 0.5) (* l (inc s)) (- (+ l s) (* l s)))
@@ -486,19 +493,19 @@
            a))))
     IHSVConvert
     (as-hsva
-      [_]
+        [_]
       (let [l2 (* 2 l)
-            v  (/ (+ l2 (* s (- 1 (m/abs (dec l2))))) 2)
+            v  (/ (+ l2 (* s (- 1 (m/abs* (dec l2))))) 2)
             s' (/ (* 2 (- v l)) v)]
         (HSVA. h s' v a)))
     IHSLConvert
     (as-hsla [_] _)
     ICMYKConvert
     (as-cmyka
-      [_] (as-cmyka (as-rgba _)))
+        [_] (as-cmyka (as-rgba _)))
     ICSSConvert
     (as-css
-      [_]
+        [_]
       (let [h (Math/round (* h 360.0)) s (Math/round (* s 100.0)) l (Math/round (* l 100.0))]
         (css
          (if (< a 1)
@@ -506,46 +513,49 @@
            (str "hsl(" h "," s "%," l "%)")))))
     IIntConvert
     (as-int24
-      [_] (as-int24 (as-rgba _)))
+        [_] (as-int24 (as-rgba _)))
     (as-int32
-      [_] (as-int32 (as-rgba _)))
+        [_] (as-int32 (as-rgba _)))
     IColorComponents
     (red
-      [_] (red (as-rgba _)))
+        [_] (red (as-rgba _)))
     (green
-      [_] (green (as-rgba _)))
+        [_] (green (as-rgba _)))
     (blue
-      [_] (blue (as-rgba _)))
+        [_] (blue (as-rgba _)))
     (alpha [_] a)
     (hue [_] h)
     (saturation [_] s)
     (brightness
-      [_] (brightness (as-rgba _)))
+        [_] (brightness (as-rgba _)))
     (luminance [_] l)
     (cyan
-      [_] (cyan (as-rgba _)))
+        [_] (cyan (as-rgba _)))
     (magenta
-      [_] (magenta (as-rgba _)))
+        [_] (magenta (as-rgba _)))
     (yellow
-      [_] (yellow (as-rgba _)))
+        [_] (yellow (as-rgba _)))
     (black
-      [_] (black (as-rgba _)))
+        [_] (black (as-rgba _)))
     IColorOps
     (rotate-hue
-      [_ theta]
+        [_ theta]
       (let [h (+ h (/ (rem theta TWO_PI) TWO_PI))]
         (HSLA. (if (neg? h) (inc h) (if (>= h 1.0) (dec h) h)) s l a)))
     (adjust-saturation
-      [_ offset] (HSLA. h (m/clamp (+ offset s) 0.0 1.0) l a))
+        [_ offset] (HSLA. h (m/clamp (+ offset s) 0.0 1.0) l a))
     (adjust-brightness
-      [_ offset] (-> _ (as-hsva) (adjust-brightness offset) (as-hsla)))
+        [_ offset] (-> _ (as-hsva) (adjust-brightness offset) (as-hsla)))
     (adjust-alpha
-      [_ offset] (HSLA. h s l (m/clamp (+ offset a) 0.0 1.0)))
+        [_ offset] (HSLA. h s l (m/clamp (+ offset a) 0.0 1.0)))
+    m/IInvert
     (invert
-      [_] (HSLA. (mod (+ 0.5 h) 1.0) (- 1.0 s) (- 1.0 l) a))
-    (blend
-      [_ dest t]
-      (let [[h2 s2 l2 a2] @(as-hsla dest)
+        [_] (HSLA. (mod (+ 0.5 h) 1.0) (- 1.0 s) (- 1.0 l) a))
+    m/IInterpolate
+    (mix
+        [_ dest t]
+      (let [^HSLA dest (as-hsla dest)
+            h2 (.-h dest)
             hd (m/abs-diff h h2)]
         (HSLA.
          (if (> hd 0.5)
@@ -553,22 +563,21 @@
              (rem (mm/mix (inc h) h2 t) 1.0)
              (rem (mm/mix h (inc h2) t) 1.0))
            (mm/mix h h2 t))
-         (mm/mix s s2 t)
-         (mm/mix l l2 t)
-         (mm/mix a a2 t)))))
+         (mm/mix s (.-s dest) t)
+         (mm/mix l (.-l dest) t)
+         (mm/mix a (.-a dest) t)))))
 #+END_SRC
 
 *** CMYK
-
 #+BEGIN_SRC clojure :noweb-ref impl :noweb yes
   (deftype CMYKA [^double c ^double m ^double y ^double k ^double a]
     <<deref(val="[c m y k a]")>>
     Object
     (toString
-      [_] (str ns-prefix "CMYKA [" c " " m " " y " " k " " a "]"))
+        [_] (str ns-prefix "CMYKA [" c " " m " " y " " k " " a "]"))
     IRGBConvert
     (as-rgba
-      [_]
+        [_]
       (RGBA.
        (- 1.0 (min 1.0 (+ c k)))
        (- 1.0 (min 1.0 (+ m k)))
@@ -576,143 +585,146 @@
        a))
     IHSVConvert
     (as-hsva
-      [_] (as-hsva (as-rgba _)))
+        [_] (as-hsva (as-rgba _)))
     IHSLConvert
     (as-hsla
-      [_] (as-hsla (as-rgba _)))
+        [_] (as-hsla (as-rgba _)))
     ICMYKConvert
     (as-cmyka [_] _)
     ICSSConvert
     (as-css
-      [_] (as-css (as-rgba _)))
+        [_] (as-css (as-rgba _)))
     IIntConvert
     (as-int24
-      [_] (as-int24 (as-rgba _)))
+        [_] (as-int24 (as-rgba _)))
     (as-int32
-      [_] (as-int32 (as-rgba _)))
+        [_] (as-int32 (as-rgba _)))
     IColorComponents
     (red
-      [_] (red (as-rgba _)))
+        [_] (red (as-rgba _)))
     (green
-      [_] (green (as-rgba _)))
+        [_] (green (as-rgba _)))
     (blue
-      [_] (blue (as-rgba _)))
+        [_] (blue (as-rgba _)))
     (alpha [_] a)
     (hue
-      [_] (hue (as-hsva _)))
+        [_] (hue (as-hsva _)))
     (saturation
-      [_] (saturation (as-rgba _)))
+        [_] (saturation (as-rgba _)))
     (brightness
-      [_] (brightness (as-rgba _)))
+        [_] (brightness (as-rgba _)))
     (luminance
-      [_] (luminance (as-rgba _)))
+        [_] (luminance (as-rgba _)))
     (cyan
-      [_] c)
+        [_] c)
     (magenta
-      [_] m)
+        [_] m)
     (yellow
-      [_] y)
+        [_] y)
     (black
-      [_] k)
+        [_] k)
     IColorOps
     (rotate-hue
-      [_ theta] (-> _ (as-hsva) (rotate-hue theta) (as-cmyka)))
+        [_ theta] (-> _ (as-hsva) (rotate-hue theta) (as-cmyka)))
     (adjust-saturation
-      [_ offset] (-> _ (as-hsva) (adjust-saturation offset) (as-cmyka)))
+        [_ offset] (-> _ (as-hsva) (adjust-saturation offset) (as-cmyka)))
     (adjust-brightness
-      [_ offset] (-> _ (as-hsva) (adjust-brightness offset) (as-cmyka)))
+        [_ offset] (-> _ (as-hsva) (adjust-brightness offset) (as-cmyka)))
     (adjust-alpha
-      [_ offset] (CMYKA. c m y k (m/clamp (+ offset a) 0.0 1.0)))
+        [_ offset] (CMYKA. c m y k (m/clamp (+ offset a) 0.0 1.0)))
+    m/IInvert
     (invert
-      [_] (CMYKA. (- 1.0 c) (- 1.0 m) (- 1.0 y) (- 1.0 k) a))
-    (blend
-      [_ dest t]
-      (CMYKA.
-       (mm/mix c (cyan dest) t)
-       (mm/mix m (magenta dest) t)
-       (mm/mix y (yellow dest) t)
-       (mm/mix k (black dest) t)
-       (mm/mix a (alpha dest) t))))
+        [_] (CMYKA. (- 1.0 c) (- 1.0 m) (- 1.0 y) (- 1.0 k) a))
+    m/IInterpolate
+    (mix
+        [_ dest t]
+      (let [^CMYKA dest (as-cmyka dest)]
+        (CMYKA.
+         (mm/mix c (.-c dest) t)
+         (mm/mix m (.-m dest) t)
+         (mm/mix y (.-y dest) t)
+         (mm/mix k (.-k dest) t)
+         (mm/mix a (.-a dest) t)))))
 #+END_SRC
 
 *** CSS
-
 #+BEGIN_SRC clojure :noweb-ref impl :noweb yes
   (deftype CSS [^String col]
     <<deref(val="col")>>
     Object
     (toString
-      [_] (str ns-prefix "CSS [\"" col "\"]"))
+        [_] (str ns-prefix "CSS [\"" col "\"]"))
     IRGBConvert
     (as-rgba
-      [_]
+        [_]
       (let [c (parse-css col)]
         (if (instance? RGBA c) c (as-rgba c))))
     IHSVConvert
     (as-hsva
-      [_] (as-hsva (as-rgba _)))
+        [_] (as-hsva (as-rgba _)))
     IHSLConvert
     (as-hsla
-      [_]
+        [_]
       (let [c (parse-css col)]
         (if (instance? HSLA c) c (as-hsla c))))
     ICMYKConvert
     (as-cmyka
-      [_] (as-cmyka (as-rgba _)))
+        [_] (as-cmyka (as-rgba _)))
     ICSSConvert
     (as-css
-      [_] _)
+        [_] _)
     IIntConvert
     (as-int24
-      [_]
+        [_]
       (let [c (parse-css col)]
         (if (instance? Int24 c) c (as-int24 c))))
     (as-int32
-      [_]
+        [_]
       (let [c (parse-css col)]
         (if (instance? Int32 c) c (as-int32 c))))
     IColorComponents
     (red
-      [_] (red (as-rgba _)))
+        [_] (red (as-rgba _)))
     (green
-      [_] (green (as-rgba _)))
+        [_] (green (as-rgba _)))
     (blue
-      [_] (blue (as-rgba _)))
+        [_] (blue (as-rgba _)))
     (alpha
-      [_] (alpha (parse-css col)))
+        [_] (alpha (parse-css col)))
     (hue
-      [_] (hue (as-hsla _)))
+        [_] (hue (as-hsla _)))
     (saturation
-      [_] (saturation (parse-css col)))
+        [_] (saturation (parse-css col)))
     (brightness
-      [_] (brightness (parse-css col)))
+        [_] (brightness (parse-css col)))
     (luminance
-      [_] (luminance (as-hsla _)))
+        [_] (luminance (as-hsla _)))
     (cyan
-      [_] (cyan (as-rgba _)))
+        [_] (cyan (as-rgba _)))
     (magenta
-      [_] (magenta (as-rgba _)))
+        [_] (magenta (as-rgba _)))
     (yellow
-      [_] (yellow (as-rgba _)))
+        [_] (yellow (as-rgba _)))
     (black
-      [_] (black (as-rgba _)))
+        [_] (black (as-rgba _)))
     IColorOps
     (rotate-hue
-      [_ theta] (-> _ (as-hsva) (rotate-hue theta) (as-css)))
+        [_ theta] (-> _ (as-hsva) (rotate-hue theta) (as-css)))
     (adjust-saturation
-      [_ offset] (-> _ (as-hsva) (adjust-saturation offset) (as-css)))
+        [_ offset] (-> _ (as-hsva) (adjust-saturation offset) (as-css)))
     (adjust-brightness
-      [_ offset] (-> _ (as-hsva) (adjust-brightness offset) (as-css)))
+        [_ offset] (-> _ (as-hsva) (adjust-brightness offset) (as-css)))
     (adjust-alpha
-      [_ offset] (-> _ (as-rgba) (adjust-alpha offset) (as-css)))
+        [_ offset] (-> _ (as-rgba) (adjust-alpha offset) (as-css)))
+    m/IInvert
     (invert
-      [_] (-> _ (as-rgba) (invert) (as-css)))
-    (blend
-      [_ dest t] (-> _ (as-rgba) (blend dest t) (as-css))))
+        [_] (-> _ (as-rgba) (m/invert) (as-css)))
+    m/IInterpolate
+    (mix
+        [_ dest t] (-> _ (as-rgba) (m/mix dest t) (as-css))))
 #+END_SRC
 
 *** Generic color space support proxy
-
 #+BEGIN_SRC clojure :noweb-ref impl :noweb yes
   (defn proxied-color-type
     [to-rgba from-rgba]
@@ -721,66 +733,67 @@
         <<deref(val="col")>>
         Object
         (toString
-          [_] (pr-str col))
+            [_] (pr-str col))
         IRGBConvert
         (as-rgba [_] (to-rgba col))
         IHSVConvert
         (as-hsva
-          [_] (as-hsva (to-rgba col)))
+            [_] (as-hsva (to-rgba col)))
         IHSLConvert
         (as-hsla
-          [_] (as-hsla (to-rgba col)))
+            [_] (as-hsla (to-rgba col)))
         ICMYKConvert
         (as-cmyka
-          [_] (as-cmyka (to-rgba col)))
+            [_] (as-cmyka (to-rgba col)))
         ICSSConvert
         (as-css
-          [_] (as-css (to-rgba col)))
+            [_] (as-css (to-rgba col)))
         IIntConvert
         (as-int24
-          [_] (as-int24 (to-rgba col)))
+            [_] (as-int24 (to-rgba col)))
         (as-int32
-          [_] (as-int32 (to-rgba col)))
+            [_] (as-int32 (to-rgba col)))
         IColorComponents
         (red
-          [_] (red (to-rgba col)))
+            [_] (red (to-rgba col)))
         (green
-          [_] (green (to-rgba col)))
+            [_] (green (to-rgba col)))
         (blue
-          [_] (blue (to-rgba col)))
+            [_] (blue (to-rgba col)))
         (alpha
-          [_] (alpha (to-rgba col)))
+            [_] (alpha (to-rgba col)))
         (hue
-          [_] (hue (as-hsva _)))
+            [_] (hue (as-hsva _)))
         (saturation
-          [_] (saturation (as-hsva _)))
+            [_] (saturation (as-hsva _)))
         (brightness
-          [_] (brightness (as-hsva _)))
+            [_] (brightness (as-hsva _)))
         (luminance
-          [_] (luminance (as-hsla _)))
+            [_] (luminance (as-hsla _)))
         (cyan
-          [_] (cyan (to-rgba col)))
+            [_] (cyan (to-rgba col)))
         (magenta
-          [_] (magenta (to-rgba col)))
+            [_] (magenta (to-rgba col)))
         (yellow
-          [_] (yellow (to-rgba col)))
+            [_] (yellow (to-rgba col)))
         (black
-          [_] (black (to-rgba col)))
+            [_] (black (to-rgba col)))
         IColorOps
         (rotate-hue
-          [_ theta] (-> col (to-rgba) (rotate-hue theta) (from-rgba) (ctor)))
+            [_ theta] (-> col (to-rgba) (rotate-hue theta) (from-rgba) (ctor)))
         (adjust-saturation
-          [_ offset] (-> col (to-rgba) (adjust-saturation offset) (from-rgba) (ctor)))
+            [_ offset] (-> col (to-rgba) (adjust-saturation offset) (from-rgba) (ctor)))
         (adjust-brightness
-          [_ offset] (-> col (to-rgba) (adjust-brightness offset) (from-rgba) (ctor)))
+            [_ offset] (-> col (to-rgba) (adjust-brightness offset) (from-rgba) (ctor)))
+        m/IInvert
         (invert
-          [_] (-> _ (to-rgba) (invert) (ctor (from-rgba))))
-        (blend
-          [_ dest t] (-> _ (to-rgba) (blend dest t) (from-rgba) (ctor))))))
+            [_] (-> col (to-rgba) (m/invert) (ctor (from-rgba))))
+        m/IInterpolate
+        (mix
+            [_ dest t] (-> col (to-rgba) (m/mix dest t) (from-rgba) (ctor))))))
 #+END_SRC
 
 *** Clojure print methods
-
 #+BEGIN_SRC clojure :noweb-ref printers
   #?(:clj
      (do
@@ -808,7 +821,6 @@
 #+END_SRC
 
 *** Constructors
-
 #+BEGIN_SRC clojure :noweb-ref ctors
   (defn rgba
     ([[r g b a]] (RGBA. r g b (or a 1.0)))
@@ -848,7 +860,6 @@
 #+END_SRC
 
 *** Primary presets
-
 #+BEGIN_SRC clojure :noweb-ref ctors
   (def RED     (rgba 1 0 0 1))
   (def GREEN   (rgba 0 1 0 1))
@@ -879,23 +890,22 @@
 #+END_SRC
 
 ** Color space & format conversion helpers
-
 #+BEGIN_SRC clojure :noweb-ref conv-helpers
   (defn- hsl-hue
     [f1 f2 h]
     (let [h (if (neg? h) (inc h) (if (>= h 1.0) (dec h) h))]
       (cond
-        (< h SIXTH)     (m/mix f1 f2 (* 6.0 h))
+        (< h SIXTH)     (mm/mix f1 f2 (* 6.0 h))
         (< h 0.5)       f2
-        (< h TWO_THIRD) (m/mix f1 f2 (mm/subm TWO_THIRD h 6.0))
+        (< h TWO_THIRD) (mm/mix f1 f2 (mm/subm TWO_THIRD h 6.0))
         :else           f1)))
 
   (defn- hue->rgb
     [h]
     (let [h (mod (* 6.0 h) 6.0)]
-      [(m/clamp (dec (m/abs (- h 3.0))) 0.0 1.0)
-       (m/clamp (- 2.0 (m/abs (- h 2.0))) 0.0 1.0)
-       (m/clamp (- 2.0 (m/abs (- h 4.0))) 0.0 1.0)]))
+      [(m/clamp (dec (m/abs* (- h 3.0))) 0.0 1.0)
+       (m/clamp (- 2.0 (m/abs* (- h 2.0))) 0.0 1.0)
+       (m/clamp (- 2.0 (m/abs* (- h 4.0))) 0.0 1.0)]))
 
   (defn- rgba->hcva
     [^RGBA rgba]
@@ -906,7 +916,7 @@
           [px py pz pw] (if (< g b) [b g -1.0 TWO_THIRD] [g b 0.0 (- THIRD)])
           [qx qy qz qw] (if (< r px) [px py pw r] [r py pz px])
           c             (- qx (min qw qy))
-          h             (m/abs (+ (/ (- qw qy) (mm/madd 6.0 c 1e-10)) qz))]
+          h             (m/abs* (+ (/ (- qw qy) (mm/madd 6.0 c 1e-10)) qz))]
       [(m/clamp h 0.0 1.0) (m/clamp c 0.0 1.0) (m/clamp qx 0.0 1.0) a]))
 
   (defn- rgba->hcya
@@ -1045,7 +1055,6 @@
 #+END_SRC
 
 ** Hue matching
-
 #+BEGIN_SRC clojure :noweb-ref ops
   (def hues
     (zipmap
@@ -1080,7 +1089,6 @@
 #+END_SRC
 
 ** Color operations
-
 #+BEGIN_SRC clojure :noweb-ref ops
   (defn complementary
     "Returns new color of same type with its hue rotated by 180 degrees."
@@ -1128,27 +1136,20 @@
 #+END_SRC
 
 ** Constants
-
 #+BEGIN_SRC clojure :noweb-ref const
-  (def THIRD (/ 1.0 3))
-  (def TWO_THIRD (/ 2.0 3))
-  (def SIXTH (/ 1.0 6))
-  (def INV8BIT (/ 1.0 0xff))
-
   (def ^:private hex6 ["#" (f/hex 6)])
 
   (def ^:private ns-prefix "#thi.ng.color.core.")
 #+END_SRC
 
 ** Complete namespace definition
-
 #+BEGIN_SRC clojure :tangle ../babel/src/thi/ng/color/core.cljc :noweb yes :mkdirp yes :padline no
   (ns thi.ng.color.core
     #?(:cljs
     (:require-macros
      [thi.ng.math.macros :as mm]))
     (:require
-     [thi.ng.math.core :as m :refer [PI TWO_PI]]
+     [thi.ng.math.core :as m :refer [PI TWO_PI THIRD TWO_THIRD SIXTH INV8BIT]]
      [thi.ng.strf.core :as f]
      [thi.ng.xerror.core :as err]
      #?(:clj [thi.ng.math.macros :as mm])))

@@ -7,6 +7,8 @@
  - [[#about-the-project][About the project]]
      - [[#overview][Overview]]
      - [[#leiningen-coordinates][Leiningen coordinates]]
+         - [[#stable][Stable]]
+         - [[#latest-snapshot][Latest snapshot]]
      - [[#status][Status]]
      - [[#example-usage][Example usage]]
  - [[#namespaces][Namespaces]]
@@ -67,9 +69,14 @@ as D3's & Cynthia Brewer's categorical color schemes originally
 intented for geo mapping and other data visualization applications.
 
 ** Leiningen coordinates
-
+*** Stable
 #+BEGIN_SRC clojure
 [thi.ng/color "1.0.1"]
+#+END_SRC
+
+*** Latest snapshot
+#+BEGIN_SRC clojure
+[thi.ng/color "1.1.0-SNAPSHOT"]
 #+END_SRC
 
 *Note:* This library relies on the new conditional reader syntax of
@@ -118,8 +125,11 @@ STABLE & under regular development, 150+ tests
   @(-> (col/rgba 1 0 0.25 0.8) (col/random-analog 0.05 0.1 0.2) col/as-css)
   ;; "rgba(255,8,63,0.8)"
 
+  ;; All color types implement the IIinterpolate protocol defined in thi.ng.math.core (1.1.0+ only)
+  ;; For previous versions use (col/blend ...) (same API as m/mix)
+  (require '[thi.ng.math.core :as m])
   ;; blend with any color space (result is in color space of first color)
-  (col/blend (col/hsva 0 1 1) (col/rgba 0 1 0 0.5) 0.5)
+  (m/mix (col/hsva 0 1 1) (col/rgba 0 1 0 0.5) 0.5)
   ;; #thi.ng.color.core.HSVA [0.16666666666666666 1.0 1.0 0.75]
 
   ;; sort colors by proximity to a target color
@@ -143,7 +153,7 @@ STABLE & under regular development, 150+ tests
 ** Injected properties                                             :noexport:
 
 #+BEGIN_SRC clojure :noweb-ref version
-1.0.1
+1.1.0-SNAPSHOT
 #+END_SRC
 
 #+BEGIN_SRC clojure :exports none :noweb-ref project-url
@@ -158,19 +168,19 @@ target/color-<<version>>.js
 *** Runtime
 **** [[https://github.com/clojure/clojure][Clojure]]
 #+BEGIN_SRC clojure :noweb-ref dep-clj
-[org.clojure/clojure "1.7.0"]
+[org.clojure/clojure "1.8.0"]
 #+END_SRC
 **** [[https://github.com/clojure/clojurescript][ClojureScript]]
 #+BEGIN_SRC clojure :noweb-ref dep-cljs
-[org.clojure/clojurescript "1.7.122"]
+[org.clojure/clojurescript "1.7.228"]
 #+END_SRC
 **** [[https://github.com/thi-ng/math][thi.ng/math]]
 #+BEGIN_SRC clojure :noweb-ref dep-math
-[thi.ng/math "0.1.4"]
+[thi.ng/math "0.2.0-SNAPSHOT"]
 #+END_SRC
 **** [[https://github.com/thi-ng/strf][thi.ng/strf]]
 #+BEGIN_SRC clojure :noweb-ref dep-strf
-[thi.ng/strf "0.2.1"]
+[thi.ng/strf "0.2.2"]
 #+END_SRC
 **** [[https://github.com/thi-ng/xerror][thi.ng/xerror]]
 #+BEGIN_SRC clojure :noweb-ref dep-xerror
@@ -187,7 +197,7 @@ target/color-<<version>>.js
 #+END_SRC
 **** [[https://github.com/emezeske/lein-cljsbuild][Cljsbuild]]
 #+BEGIN_SRC clojure :noweb-ref dep-cljsbuild
-[lein-cljsbuild "1.0.6"]
+[lein-cljsbuild "1.1.2"]
 #+END_SRC
 
 ** Leiningen coordinates
@@ -316,6 +326,7 @@ symbol =version= holding the version string defined above:
 
 | *Version* | *Released* | *Description*                                          | *Tagged Github URL* |
 |-----------+------------+--------------------------------------------------------+---------------------|
+|     1.1.0 |        TBD | protocol updates, optimizations, bugfixes              | [[https://github.com/thi-ng/color/tree/1.1.0][1.1.0]]               |
 |     1.0.1 | 2015-12-25 | bugfix yuva & cie1931 rgba conversions                 | [[https://github.com/thi-ng/color/tree/1.0.1][1.0.1]]               |
 |     1.0.0 | 2015-10-02 | complete rewrite using protocols                       | [[https://github.com/thi-ng/color/tree/1.0.0][1.0.0]]               |
 |     0.3.1 | 2015-06-21 | add YCbCr & YUV conversion, update deps                | [[https://github.com/thi-ng/color/tree/0.3.1][0.3.1]]               |
