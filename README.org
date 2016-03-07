@@ -178,6 +178,15 @@ target/color-<<version>>.js
 #+BEGIN_SRC clojure :noweb-ref dep-math
 [thi.ng/math "0.2.0-SNAPSHOT"]
 #+END_SRC
+**** [[https://github.com/thi-ng/dstruct][thi.ng/dstruct]]
+#+BEGIN_SRC clojure :noweb-ref dep-dstruct
+[thi.ng/dstruct "0.1.3-SNAPSHOT"]
+#+END_SRC
+**** [[https://github.com/thi-ng/typedarrays/][thi.ng/typedarrays]]
+#+NAME: dep-arrays
+#+BEGIN_SRC clojure
+[thi.ng/typedarrays "0.1.2"]
+#+END_SRC
 **** [[https://github.com/thi-ng/strf][thi.ng/strf]]
 #+BEGIN_SRC clojure :noweb-ref dep-strf
 [thi.ng/strf "0.2.2"]
@@ -265,6 +274,8 @@ in the REPL via =(require 'thi.ng.color... :reload)= or similar.
     :dependencies [<<dep-clj>>
                    <<dep-cljs>>
                    <<dep-math>>
+                   <<dep-dstruct>>
+                   <<dep-arrays>>
                    <<dep-strf>>
                    <<dep-xerror>>]
 
