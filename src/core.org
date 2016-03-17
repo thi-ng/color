@@ -81,9 +81,6 @@
 #+BEGIN_SRC clojure :noweb-ref impl :noweb yes
   (defrecord RGBA [^double r ^double g ^double b ^double a]
     <<deref(val="[r g b a]")>>
-    Object
-    (toString
-        [_] (str ns-prefix "RGBA [" r " " g " " b " " a "]"))
     IRGBConvert
     (as-rgba [_] _)
     IHSVConvert
@@ -223,9 +220,6 @@
 #+BEGIN_SRC clojure :noweb-ref impl :noweb yes
   (defrecord Int24 #?(:clj [^int col] :cljs [col])
     <<deref(val="col")>>
-    Object
-    (toString
-        [_] (str ns-prefix "Int24 [" col "]"))
     IRGBConvert
     (as-rgba
         [_]
@@ -298,9 +292,9 @@
         (Int24.
          (bit-or
           (bit-or
-           (bit-shift-left (int (mm/mix r (+ (* (.-r dest) 0xff) 0.5) t)) 16)
-           (bit-shift-left (int (mm/mix g (+ (* (.-g dest) 0xff) 0.5) t)) 8))
-          (int (mm/mix b (+ (* (.-b dest) 0xff) 0.5) t))))))
+           (bit-shift-left (int (+ 0.5 (mm/mix r (* (.-r dest) 0xff) t))) 16)
+           (bit-shift-left (int (+ 0.5 (mm/mix g (* (.-g dest) 0xff) t))) 8))
+          (int (+ 0.5 (mm/mix b (* (.-b dest) 0xff) t)))))))
     streams/IBuffer
     (get-buffer
         [_] (streams/get-buffer (as-rgba _)))
@@ -309,9 +303,6 @@
 
   (defrecord Int32 #?(:clj [^long col] :cljs [col])
     <<deref(val="col")>>
-    Object
-    (toString
-        [_] (str ns-prefix "Int32 [" col "]"))
     IRGBConvert
     (as-rgba
         [_]
@@ -393,10 +384,10 @@
          (bit-or
           (bit-or
            (bit-or
-            (bit-shift-left (int (mm/mix r (+ (* (.-r dest) 0xff) 0.5) t)) 16)
-            (bit-shift-left (int (mm/mix g (+ (* (.-g dest) 0xff) 0.5) t)) 8))
-           (int (mm/mix b (+ (* (.-b dest) 0xff) 0.5) t)))
-          (bit-shift-left (int (mm/mix a (+ (* (.-a dest) 0xff) 0.5) t)) 24)))))
+            (bit-shift-left (int (+ 0.5 (mm/mix r (* (.-r dest) 0xff) t))) 16)
+            (bit-shift-left (int (+ 0.5 (mm/mix g (* (.-g dest) 0xff) t))) 8))
+           (int (+ 0.5 (mm/mix b (* (.-b dest) 0xff) t))))
+          (bit-shift-left (int (+ 0.5 (mm/mix a (* (.-a dest) 0xff) t))) 24)))))
     streams/IBuffer
     (get-buffer
         [_] (streams/get-buffer (as-rgba _)))
@@ -411,9 +402,6 @@
 #+BEGIN_SRC clojure :noweb-ref impl :noweb yes
   (defrecord HSVA [^double h ^double s ^double v ^double a]
     <<deref(val="[h s v a]")>>
-    Object
-    (toString
-        [_] (str ns-prefix "HSVA [" h " " s " " v " " a "]"))
     IRGBConvert
     (as-rgba
         [_]
@@ -517,9 +505,6 @@
 #+BEGIN_SRC clojure :noweb-ref impl :noweb yes
   (defrecord HSLA [^double h ^double s ^double l ^double a]
     <<deref(val="[h s l a]")>>
-    Object
-    (toString
-        [_] (str ns-prefix "HSLA [" h " " s " " l " " a "]"))
     IRGBConvert
     (as-rgba
         [_]
@@ -622,12 +607,12 @@
 #+END_SRC
 
 *** CMYK
+
+- IBuffer implementation delegates to RGBA
+
 #+BEGIN_SRC clojure :noweb-ref impl :noweb yes
   (defrecord CMYKA [^double c ^double m ^double y ^double k ^double a]
     <<deref(val="[c m y k a]")>>
-    Object
-    (toString
-        [_] (str ns-prefix "CMYKA [" c " " m " " y " " k " " a "]"))
     IRGBConvert
     (as-rgba
         [_]
@@ -702,15 +687,9 @@
          (mm/mix a (.-a dest) t))))
     streams/IBuffer
     (get-buffer
-        [_] (#?(:clj double-array :cljs ta/float32) [c m y k a]))
+        [_] (streams/get-buffer (as-rgba _)))
     (into-buffer
-        [_ dest stride idx]
-      (aset ^doubles dest idx c)
-      (aset ^doubles dest (+ idx 1) m)
-      (aset ^doubles dest (+ idx 2) y)
-      (aset ^doubles dest (+ idx 3) k)
-      (aset ^doubles dest (+ idx 4) a)
-      (+ idx stride)))
+        [_ dest stride idx] (streams/into-buffer (as-rgba _) dest stride idx)))
 #+END_SRC
 
 *** CSS
@@ -720,9 +699,6 @@
 #+BEGIN_SRC clojure :noweb-ref impl :noweb yes
   (defrecord CSS [^String col]
     <<deref(val="col")>>
-    Object
-    (toString
-        [_] (str ns-prefix "CSS [\"" col "\"]"))
     IRGBConvert
     (as-rgba
         [_]
@@ -880,36 +856,15 @@
 #+END_SRC
 
 *** Clojure print methods
+
 #+BEGIN_SRC clojure :noweb-ref printers
-  #?(:clj
-     (do
-       (defmethod print-method thi.ng.color.core.RGBA [^RGBA c ^java.io.Writer w] (.write w (.toString c)))
-       (defmethod print-dup thi.ng.color.core.RGBA [o w] (print-method o w))
-
-       (defmethod print-method thi.ng.color.core.HSVA [^HSVA c ^java.io.Writer w] (.write w (.toString c)))
-       (defmethod print-dup thi.ng.color.core.HSVA [o w] (print-method o w))
-
-       (defmethod print-method thi.ng.color.core.HSLA [^HSLA c ^java.io.Writer w] (.write w (.toString c)))
-       (defmethod print-dup thi.ng.color.core.HSLA [o w] (print-method o w))
-
-       (defmethod print-method thi.ng.color.core.CMYKA [^CMYKA c ^java.io.Writer w] (.write w (.toString c)))
-       (defmethod print-dup thi.ng.color.core.CMYKA [o w] (print-method o w))
-
-       (defmethod print-method thi.ng.color.core.Int24 [^Int24 c ^java.io.Writer w] (.write w (.toString c)))
-       (defmethod print-dup thi.ng.color.core.Int24 [o w] (print-method o w))
-
-       (defmethod print-method thi.ng.color.core.Int32 [^Int32 c ^java.io.Writer w] (.write w (.toString c)))
-       (defmethod print-dup thi.ng.color.core.Int32 [o w] (print-method o w))
-
-       (defmethod print-method thi.ng.color.core.CSS [^CSS c ^java.io.Writer w] (.write w (.toString c)))
-       (defmethod print-dup thi.ng.color.core.CSS [o w] (print-method o w))
-       ))
+  #?(:clj (prefer-method print-method clojure.lang.IRecord clojure.lang.IDeref))
 #+END_SRC
 
 *** Constructors
 #+BEGIN_SRC clojure :noweb-ref ctors
   (defn rgba
-    ([[r g b a]] (RGBA. r g b (or a 1.0)))
+    ([[r g b a]] (RGBA. r g b (if a a 1.0)))
     ([r g b] (RGBA. r g b 1.0))
     ([r g b a] (RGBA. r g b a)))
 
@@ -923,17 +878,17 @@
        (Int32. (bit-or (bit-and col 0xffffff) (bit-shift-left a 24))))))
 
   (defn hsva
-    ([[h s v a]] (HSVA. h s v (or a 1.0)))
+    ([[h s v a]] (HSVA. h s v (if a a 1.0)))
     ([h s v] (HSVA. h s v 1.0))
     ([h s v a] (HSVA. h s v a)))
 
   (defn hsla
-    ([[h s l a]] (HSLA. h s l (or a 1.0)))
+    ([[h s l a]] (HSLA. h s l (if a a 1.0)))
     ([h s l] (HSLA. h s l 1.0))
     ([h s l a] (HSLA. h s l a)))
 
   (defn cmyka
-    ([[c m y k a]] (CMYKA. c m y k (or a 1.0)))
+    ([[c m y k a]] (CMYKA. c m y k (if a a 1.0)))
     ([c m y k] (CMYKA. c m y k 1.0))
     ([c m y k a] (CMYKA. c m y k a)))
 
@@ -942,7 +897,7 @@
 
   (defn random-rgb
     "Returns a random RGBA color with 100% alpha"
-    [] (rgba (m/random) (m/random) (m/random) 1.0))
+    [] (RGBA. (m/random) (m/random) (m/random) 1.0))
 #+END_SRC
 
 *** Primary presets
@@ -1192,11 +1147,13 @@
   (defn random-analog
     "Returns new color of same type with its hue rotated and adjusted
     saturation & brightness within given tolerances (+/-)."
-    [col theta sat bright]
-    (analog col
-     (* (m/randnorm) theta)
-     (* (m/randnorm) sat)
-     (* (m/randnorm) bright)))
+    ([col delta]
+     (random-analog col delta delta delta))
+    ([col theta sat bright]
+     (analog col
+             (* (m/randnorm) theta)
+             (* (m/randnorm) sat)
+             (* (m/randnorm) bright))))
 
   (defn dist-rgb
     "Returns RGB distance of any two colors"
@@ -1209,7 +1166,7 @@
       (Math/sqrt (mm/madd dr dr dg dg db db))))
 
   (defn dist-hsv
-    "Returns HSV distance of any two colors"
+    "Returns HSV distance of any two colors (in cartesian space)."
     [a b]
     (let [[ha sa va] @(as-hsva a)
           [hb sb vb] @(as-hsva b)
@@ -1250,7 +1207,7 @@
 
   <<impl>>
 
-  ;; <<printers_>>
+  <<printers>>
 
   <<ctors>>
 
