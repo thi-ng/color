@@ -79,7 +79,7 @@
 
 *** RGBA
 #+BEGIN_SRC clojure :noweb-ref impl :noweb yes
-  (deftype RGBA [^double r ^double g ^double b ^double a]
+  (defrecord RGBA [^double r ^double g ^double b ^double a]
     <<deref(val="[r g b a]")>>
     Object
     (toString
@@ -221,7 +221,7 @@
 - IBuffer implementation delegates to RGBA
 
 #+BEGIN_SRC clojure :noweb-ref impl :noweb yes
-  (deftype Int24 #?(:clj [^int col] :cljs [col])
+  (defrecord Int24 #?(:clj [^int col] :cljs [col])
     <<deref(val="col")>>
     Object
     (toString
@@ -307,7 +307,7 @@
     (into-buffer
         [_ dest stride idx] (streams/into-buffer (as-rgba _) dest stride idx)))
 
-  (deftype Int32 #?(:clj [^long col] :cljs [col])
+  (defrecord Int32 #?(:clj [^long col] :cljs [col])
     <<deref(val="col")>>
     Object
     (toString
@@ -409,7 +409,7 @@
 - http://codeitdown.com/hsl-hsb-hsv-color/
 
 #+BEGIN_SRC clojure :noweb-ref impl :noweb yes
-  (deftype HSVA [^double h ^double s ^double v ^double a]
+  (defrecord HSVA [^double h ^double s ^double v ^double a]
     <<deref(val="[h s v a]")>>
     Object
     (toString
@@ -515,7 +515,7 @@
 
 *** HSLA
 #+BEGIN_SRC clojure :noweb-ref impl :noweb yes
-  (deftype HSLA [^double h ^double s ^double l ^double a]
+  (defrecord HSLA [^double h ^double s ^double l ^double a]
     <<deref(val="[h s l a]")>>
     Object
     (toString
@@ -623,7 +623,7 @@
 
 *** CMYK
 #+BEGIN_SRC clojure :noweb-ref impl :noweb yes
-  (deftype CMYKA [^double c ^double m ^double y ^double k ^double a]
+  (defrecord CMYKA [^double c ^double m ^double y ^double k ^double a]
     <<deref(val="[c m y k a]")>>
     Object
     (toString
@@ -718,7 +718,7 @@
 - IBuffer implementation delegates to RGBA
 
 #+BEGIN_SRC clojure :noweb-ref impl :noweb yes
-  (deftype CSS [^String col]
+  (defrecord CSS [^String col]
     <<deref(val="col")>>
     Object
     (toString
@@ -1250,7 +1250,7 @@
 
   <<impl>>
 
-  <<printers>>
+  ;; <<printers_>>
 
   <<ctors>>
 
