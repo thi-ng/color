@@ -15,6 +15,8 @@
 
 Based on method by iq (Iñigo Quílez): http://v.gd/B2aySt
 
+Online gradient designer / editor: http://dev.thi.ng/gradients/
+
 *** Presets
 
 Here we define a number of RGB gradient presets, primarily useful for
@@ -133,7 +135,7 @@ When tangling this file, the code below will be saved in the
                      {:domain [0 1] :range [50 580] :major 0.5 :minor 0.125 :pos 250})
             :y-axis (viz/linear-axis
                      {:domain [0 1] :range [250 20] :major 0.2 :minor 0.1 :pos 50
-                      :label-dist 15 :label {:text-anchor "end"}})
+                      :label-dist 15 :label-style {:text-anchor "end"}})
             :grid   {:minor-y true}
             :data   (channel-specs colors)}
            (viz/svg-plot2d-cartesian)
