@@ -152,7 +152,7 @@ When tangling this file, the code below will be saved in the
             :y-axis (viz/linear-axis
                      {:domain [0 1] :range [250 20] :major 0.2 :minor 0.1 :pos 50
                       :label-dist 15 :label-style {:text-anchor "end"}})
-            :grid   {:minor-y true}
+            :grid   {:minor-x true :minor-y true}
             :data   (channel-specs colors)}
            (viz/svg-plot2d-cartesian)
            (svg/svg

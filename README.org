@@ -69,7 +69,7 @@ intented for geo mapping and other data visualization applications.
 ** Leiningen coordinates
 *** Stable
 #+BEGIN_SRC clojure
-[thi.ng/color "1.1.1"]
+[thi.ng/color "1.1.2"]
 #+END_SRC
 
 *Note:* This library relies on the new conditional reader syntax of
@@ -146,7 +146,7 @@ STABLE & under regular development, 150+ tests
 ** Injected properties                                             :noexport:
 
 #+BEGIN_SRC clojure :noweb-ref version
-1.1.1
+1.1.2
 #+END_SRC
 
 #+BEGIN_SRC clojure :exports none :noweb-ref project-url
@@ -333,6 +333,7 @@ symbol =version= holding the version string defined above:
 
 | *Version* | *Released* | *Description*                                             | *Tagged GH URL* |
 |-----------+------------+-----------------------------------------------------------+-----------------|
+|     1.1.2 | 2016-03-28 | add gradient presets                                      | [[https://github.com/thi-ng/color/tree/1.1.2][1.1.2]]           |
 |     1.1.1 | 2016-03-19 | fix dependencies                                          | [[https://github.com/thi-ng/color/tree/1.1.1][1.1.1]]           |
 |     1.1.0 | 2016-03-19 | defrecord impl, protocol updates, optimizations, bugfixes | [[https://github.com/thi-ng/color/tree/1.1.0][1.1.0]]           |
 |     1.0.1 | 2015-12-25 | bugfix yuva & cie1931 rgba conversions                    | [[https://github.com/thi-ng/color/tree/1.0.1][1.0.1]]           |
