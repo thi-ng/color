@@ -216,13 +216,38 @@ clipped & signed 32bit test values...
    ))
 #+END_SRC
 
+#+BEGIN_SRC clojure :noweb-ref test
+  #?(:clj
+     (defn buf-seq
+       [c]
+       (let [b (FloatBuffer/allocate 4)
+             a (float-array 4)]
+         (streams/into-float-buffer c b 4 0)
+         (.rewind b)
+         (.get b a)
+         (seq a))))
+
+  #?(:clj
+     (deftest test-buffers
+       (let [c (col/rgba 1 0 0 0.5)]
+         (is (d= [1 0 0 0.5] (buf-seq c)))
+         (is (d= [1 0 0 1] (buf-seq (col/int24 0xff0000))))
+         (is (d= [1 0 0 0.5] (buf-seq (col/int32 0x80ff0000))))
+         (is (d= [0 1 1 0.5] (buf-seq (col/as-hsva c))))
+         (is (d= [0 1 0.5 0.5] (buf-seq (col/as-hsla c))))
+         (is (d= [1 0 0 0.5] (buf-seq (col/as-cmyka c))))
+         (is (d= [1 0 0 0.5] (buf-seq (col/as-css c)))))))
+#+END_SRC
+
 ** Complete namespace declaration
 
 #+BEGIN_SRC clojure :tangle ../babel/test/thi/ng/color/test/core.cljc :noweb yes :mkdirp yes :padline no
   (ns thi.ng.color.test.core
+    #?(:clj (:import [java.nio FloatBuffer]))
     (:require
      [thi.ng.color.core :as col]
      [thi.ng.math.core :as m :refer [delta=]]
+     [thi.ng.dstruct.streams :as streams]
      #?(:clj
         [clojure.test :refer :all]
         :cljs

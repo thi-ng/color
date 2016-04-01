@@ -128,7 +128,8 @@
          (max (- c k) 0.0)
          (max (- m k) 0.0)
          (max (- y k) 0.0)
-         (max k 0.0))))
+         (max k 0.0)
+         a)))
     ICSSConvert
     (as-css
         [_]
@@ -202,14 +203,22 @@
          (mm/mix b (.-b dest) t)
          (mm/mix a (.-a dest) t))))
     streams/IBuffer
-    (get-buffer
-        [_] (#?(:clj double-array :cljs ta/float32) [r g b a]))
-    (into-buffer
+    (get-float-buffer
+        [_] (#?(:clj float-array :cljs ta/float32) [r g b a]))
+    streams/IIntoBuffer
+    (into-float-buffer
         [_ dest stride idx]
-      (aset ^doubles dest idx r)
-      (aset ^doubles dest (+ idx 1) g)
-      (aset ^doubles dest (+ idx 2) b)
-      (aset ^doubles dest (+ idx 3) a)
+      #?@(:clj
+          [(.position ^FloatBuffer dest (int idx))
+           (.put ^FloatBuffer dest (float r))
+           (.put ^FloatBuffer dest (float g))
+           (.put ^FloatBuffer dest (float b))
+           (.put ^FloatBuffer dest (float a))]
+          :cljs
+          [(aset dest idx r)
+           (aset dest (+ idx 1) g)
+           (aset dest (+ idx 2) b)
+           (aset dest (+ idx 3) a)])
       (+ idx stride)))
 #+END_SRC
 
@@ -296,10 +305,11 @@
            (bit-shift-left (int (+ 0.5 (mm/mix g (* (.-g dest) 0xff) t))) 8))
           (int (+ 0.5 (mm/mix b (* (.-b dest) 0xff) t)))))))
     streams/IBuffer
-    (get-buffer
-        [_] (streams/get-buffer (as-rgba _)))
-    (into-buffer
-        [_ dest stride idx] (streams/into-buffer (as-rgba _) dest stride idx)))
+    (get-float-buffer
+        [_] (streams/get-float-buffer (as-rgba _)))
+    streams/IIntoBuffer
+    (into-float-buffer
+        [_ dest stride idx] (streams/into-float-buffer (as-rgba _) dest stride idx)))
 
   (defrecord Int32 #?(:clj [^long col] :cljs [col])
     <<deref(val="col")>>
@@ -389,10 +399,11 @@
            (int (+ 0.5 (mm/mix b (* (.-b dest) 0xff) t))))
           (bit-shift-left (int (+ 0.5 (mm/mix a (* (.-a dest) 0xff) t))) 24)))))
     streams/IBuffer
-    (get-buffer
-        [_] (streams/get-buffer (as-rgba _)))
-    (into-buffer
-        [_ dest stride idx] (streams/into-buffer (as-rgba _) dest stride idx)))
+    (get-float-buffer
+        [_] (streams/get-float-buffer (as-rgba _)))
+    streams/IIntoBuffer
+    (into-float-buffer
+        [_ dest stride idx] (streams/into-float-buffer (as-rgba _) dest stride idx)))
 #+END_SRC
 
 *** HSVA
@@ -490,14 +501,22 @@
          (mm/mix v (.-v dest) t)
          (mm/mix a (.-a dest) t))))
     streams/IBuffer
-    (get-buffer
-        [_] (#?(:clj double-array :cljs ta/float32) [h s v a]))
-    (into-buffer
+    (get-float-buffer
+        [_] (#?(:clj float-array :cljs ta/float32) [h s v a]))
+    streams/IIntoBuffer
+    (into-float-buffer
         [_ dest stride idx]
-      (aset ^doubles dest idx h)
-      (aset ^doubles dest (+ idx 1) s)
-      (aset ^doubles dest (+ idx 2) v)
-      (aset ^doubles dest (+ idx 3) a)
+      #?@(:clj
+          [(.position ^FloatBuffer dest (int idx))
+           (.put ^FloatBuffer dest (float h))
+           (.put ^FloatBuffer dest (float s))
+           (.put ^FloatBuffer dest (float v))
+           (.put ^FloatBuffer dest (float a))]
+          :cljs
+          [(aset dest idx h)
+           (aset dest (+ idx 1) s)
+           (aset dest (+ idx 2) v)
+           (aset dest (+ idx 3) a)])
       (+ idx stride)))
 #+END_SRC
 
@@ -595,14 +614,22 @@
          (mm/mix l (.-l dest) t)
          (mm/mix a (.-a dest) t))))
     streams/IBuffer
-    (get-buffer
-        [_] (#?(:clj double-array :cljs ta/float32) [h s l a]))
-    (into-buffer
+    (get-float-buffer
+        [_] (#?(:clj float-array :cljs ta/float32) [h s l a]))
+    streams/IIntoBuffer
+    (into-float-buffer
         [_ dest stride idx]
-      (aset ^doubles dest idx h)
-      (aset ^doubles dest (+ idx 1) s)
-      (aset ^doubles dest (+ idx 2) l)
-      (aset ^doubles dest (+ idx 3) a)
+      #?@(:clj
+          [(.position ^FloatBuffer dest (int idx))
+           (.put ^FloatBuffer dest (float h))
+           (.put ^FloatBuffer dest (float s))
+           (.put ^FloatBuffer dest (float l))
+           (.put ^FloatBuffer dest (float a))]
+          :cljs
+          [(aset dest idx h)
+           (aset dest (+ idx 1) s)
+           (aset dest (+ idx 2) l)
+           (aset dest (+ idx 3) a)])
       (+ idx stride)))
 #+END_SRC
 
@@ -686,10 +713,11 @@
          (mm/mix k (.-k dest) t)
          (mm/mix a (.-a dest) t))))
     streams/IBuffer
-    (get-buffer
-        [_] (streams/get-buffer (as-rgba _)))
-    (into-buffer
-        [_ dest stride idx] (streams/into-buffer (as-rgba _) dest stride idx)))
+    (get-float-buffer
+        [_] (streams/get-float-buffer (as-rgba _)))
+    streams/IIntoBuffer
+    (into-float-buffer
+        [_ dest stride idx] (streams/into-float-buffer (as-rgba _) dest stride idx)))
 #+END_SRC
 
 *** CSS
@@ -770,10 +798,11 @@
     (mix
         [_ dest t] (-> _ (as-rgba) (m/mix dest t) (as-css)))
     streams/IBuffer
-    (get-buffer
-        [_] (streams/get-buffer (as-rgba _)))
-    (into-buffer
-        [_ dest stride idx] (streams/into-buffer (as-rgba _) dest stride idx)))
+    (get-float-buffer
+        [_] (streams/get-float-buffer (as-rgba _)))
+    streams/IIntoBuffer
+    (into-float-buffer
+        [_ dest stride idx] (streams/into-float-buffer (as-rgba _) dest stride idx)))
 #+END_SRC
 
 *** Generic color space support proxy
@@ -835,24 +864,25 @@
             [_] (black (to-rgba col)))
         IColorOps
         (rotate-hue
-            [_ theta] (-> col (to-rgba) (rotate-hue theta) (from-rgba) (ctor)))
+            [_ theta] (-> col to-rgba (rotate-hue theta) from-rgba ctor))
         (adjust-saturation
-            [_ offset] (-> col (to-rgba) (adjust-saturation offset) (from-rgba) (ctor)))
+            [_ offset] (-> col to-rgba (adjust-saturation offset) from-rgba ctor))
         (adjust-brightness
-            [_ offset] (-> col (to-rgba) (adjust-brightness offset) (from-rgba) (ctor)))
+            [_ offset] (-> col to-rgba (adjust-brightness offset) from-rgba ctor))
         m/IInvert
         (invert
-            [_] (-> col (to-rgba) (m/invert) (ctor (from-rgba))))
+            [_] (-> col to-rgba m/invert from-rgba ctor))
         m/IInterpolate
         (mix
             [_ dest] (m/mix _ dest 0.5))
         (mix
-            [_ dest t] (-> col (to-rgba) (m/mix dest t) (from-rgba) (ctor)))
+            [_ dest t] (-> col to-rgba (m/mix dest t) from-rgba ctor))
         streams/IBuffer
-        (get-buffer
-            [_] (-> col to-rgba streams/get-buffer))
-        (into-buffer
-            [_ dest stride idx] (-> col to-rgba (streams/into-buffer dest stride idx))))))
+        (get-float-buffer
+            [_] (-> col to-rgba streams/get-float-buffer))
+        streams/IIntoBuffer
+        (into-float-buffer
+            [_ dest stride idx] (-> col to-rgba (streams/into-float-buffer dest stride idx))))))
 #+END_SRC
 
 *** Clojure print methods
@@ -1188,9 +1218,12 @@
 ** Complete namespace definition
 #+BEGIN_SRC clojure :tangle ../babel/src/thi/ng/color/core.cljc :noweb yes :mkdirp yes :padline no
   (ns thi.ng.color.core
-    #?(:cljs
-    (:require-macros
-     [thi.ng.math.macros :as mm]))
+    #?(:clj
+       (:import
+        [java.nio FloatBuffer])
+       :cljs
+       (:require-macros
+        [thi.ng.math.macros :as mm]))
     (:require
      [thi.ng.math.core :as m :refer [PI TWO_PI THIRD TWO_THIRD SIXTH INV8BIT]]
      [thi.ng.dstruct.streams :as streams]
