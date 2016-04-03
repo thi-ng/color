@@ -218,7 +218,15 @@ clipped & signed 32bit test values...
 
 #+BEGIN_SRC clojure :noweb-ref test
   #?(:clj
-     (defn buf-seq
+     (defn get-buf-seq
+       [c]
+       (let [b (streams/get-float-buffer c)
+             a (float-array 4)]
+         (.get ^FloatBuffer b a)
+         (seq a))))
+
+  #?(:clj
+     (defn into-buf-seq
        [c]
        (let [b (FloatBuffer/allocate 4)
              a (float-array 4)]
@@ -230,13 +238,20 @@ clipped & signed 32bit test values...
   #?(:clj
      (deftest test-buffers
        (let [c (col/rgba 1 0 0 0.5)]
-         (is (d= [1 0 0 0.5] (buf-seq c)))
-         (is (d= [1 0 0 1] (buf-seq (col/int24 0xff0000))))
-         (is (d= [1 0 0 0.5] (buf-seq (col/int32 0x80ff0000))))
-         (is (d= [0 1 1 0.5] (buf-seq (col/as-hsva c))))
-         (is (d= [0 1 0.5 0.5] (buf-seq (col/as-hsla c))))
-         (is (d= [1 0 0 0.5] (buf-seq (col/as-cmyka c))))
-         (is (d= [1 0 0 0.5] (buf-seq (col/as-css c)))))))
+         (is (d= [1 0 0 0.5] (get-buf-seq c)))
+         (is (d= [1 0 0 1] (get-buf-seq (col/int24 0xff0000))))
+         (is (d= [1 0 0 0.5] (get-buf-seq (col/int32 0x80ff0000))))
+         (is (d= [0 1 1 0.5] (get-buf-seq (col/as-hsva c))))
+         (is (d= [0 1 0.5 0.5] (get-buf-seq (col/as-hsla c))))
+         (is (d= [1 0 0 0.5] (get-buf-seq (col/as-cmyka c))))
+         (is (d= [1 0 0 0.5] (get-buf-seq (col/as-css c))))
+         (is (d= [1 0 0 0.5] (into-buf-seq c)))
+         (is (d= [1 0 0 1] (into-buf-seq (col/int24 0xff0000))))
+         (is (d= [1 0 0 0.5] (into-buf-seq (col/int32 0x80ff0000))))
+         (is (d= [0 1 1 0.5] (into-buf-seq (col/as-hsva c))))
+         (is (d= [0 1 0.5 0.5] (into-buf-seq (col/as-hsla c))))
+         (is (d= [1 0 0 0.5] (into-buf-seq (col/as-cmyka c))))
+         (is (d= [1 0 0 0.5] (into-buf-seq (col/as-css c)))))))
 #+END_SRC
 
 ** Complete namespace declaration

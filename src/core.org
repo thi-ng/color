@@ -204,7 +204,16 @@
          (mm/mix a (.-a dest) t))))
     streams/IBuffer
     (get-float-buffer
-        [_] (#?(:clj float-array :cljs ta/float32) [r g b a]))
+        [_]
+      #?(:clj
+         (doto (FloatBuffer/allocate 4)
+           (.put (float r))
+           (.put (float g))
+           (.put (float b))
+           (.put (float a))
+           (.rewind))
+         :cljs
+         (ta/float32 [r g b a])))
     streams/IIntoBuffer
     (into-float-buffer
         [_ dest stride idx]
@@ -502,7 +511,16 @@
          (mm/mix a (.-a dest) t))))
     streams/IBuffer
     (get-float-buffer
-        [_] (#?(:clj float-array :cljs ta/float32) [h s v a]))
+        [_]
+      #?(:clj
+         (doto (FloatBuffer/allocate 4)
+           (.put (float h))
+           (.put (float s))
+           (.put (float v))
+           (.put (float a))
+           (.rewind))
+         :cljs
+         (ta/float32 [h s v a])))
     streams/IIntoBuffer
     (into-float-buffer
         [_ dest stride idx]
@@ -615,7 +633,16 @@
          (mm/mix a (.-a dest) t))))
     streams/IBuffer
     (get-float-buffer
-        [_] (#?(:clj float-array :cljs ta/float32) [h s l a]))
+        [_]
+      #?(:clj
+         (doto (FloatBuffer/allocate 4)
+           (.put (float h))
+           (.put (float s))
+           (.put (float l))
+           (.put (float a))
+           (.rewind))
+         :cljs
+         (ta/float32 [h s l a])))
     streams/IIntoBuffer
     (into-float-buffer
         [_ dest stride idx]
