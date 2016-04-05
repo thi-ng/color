@@ -926,7 +926,7 @@
     ([r g b a] (RGBA. r g b a)))
 
   (defn int24
-    [col] (Int24. col))
+    [col] (Int24. (bit-and col 0xffffff)))
 
   (defn int32
     ([col] (Int32. col))
