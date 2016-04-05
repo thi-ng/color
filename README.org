@@ -69,7 +69,7 @@ intented for geo mapping and other data visualization applications.
 ** Leiningen coordinates
 *** Stable
 #+BEGIN_SRC clojure
-[thi.ng/color "1.1.2"]
+[thi.ng/color "1.2.0"]
 #+END_SRC
 
 *Note:* This library relies on the new conditional reader syntax of
@@ -78,10 +78,7 @@ compatible with Clojure versions < 1.7.0
 
 ** Status
 
-STABLE & under regular development, 150+ tests
-
-*Note: That version 1.0.0 constitutes a complete rewrite with a new
- architecture and is not compatible with earlier versions!*
+STABLE & under regular development, 170+ tests
 
 ** Example usage
 
@@ -146,7 +143,7 @@ STABLE & under regular development, 150+ tests
 ** Injected properties                                             :noexport:
 
 #+BEGIN_SRC clojure :noweb-ref version
-1.2.0-SNAPSHOT
+1.2.0
 #+END_SRC
 
 #+BEGIN_SRC clojure :exports none :noweb-ref project-url
@@ -173,7 +170,7 @@ target/color-<<version>>.js
 #+END_SRC
 **** [[https://github.com/thi-ng/dstruct][thi.ng/dstruct]]
 #+BEGIN_SRC clojure :noweb-ref dep-dstruct
-[thi.ng/dstruct "0.2.0-SNAPSHOT"]
+[thi.ng/dstruct "0.2.0"]
 #+END_SRC
 **** [[https://github.com/thi-ng/typedarrays/][thi.ng/typedarrays]]
 #+NAME: dep-arrays
@@ -333,6 +330,7 @@ symbol =version= holding the version string defined above:
 
 | *Version* | *Released* | *Description*                                             | *Tagged GH URL* |
 |-----------+------------+-----------------------------------------------------------+-----------------|
+|     1.2.0 | 2016-04-05 | update dstruct dep, refactor IBuffer impls, add tests     | [[https://github.com/thi-ng/color/tree/1.2.0][1.2.0]]           |
 |     1.1.2 | 2016-03-28 | add gradient presets                                      | [[https://github.com/thi-ng/color/tree/1.1.2][1.1.2]]           |
 |     1.1.1 | 2016-03-19 | fix dependencies                                          | [[https://github.com/thi-ng/color/tree/1.1.1][1.1.1]]           |
 |     1.1.0 | 2016-03-19 | defrecord impl, protocol updates, optimizations, bugfixes | [[https://github.com/thi-ng/color/tree/1.1.0][1.1.0]]           |
