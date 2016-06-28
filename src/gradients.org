@@ -107,7 +107,7 @@ generator...
   (def my-grad
     (->> :red-blue
          (grad/cosine-schemes)
-         (apply grad/cosine-gradient 100)))
+         (grad/cosine-gradient 100)))
 
   ;; specifying cosine coefficients directly
   (def my-grad
