@@ -183,7 +183,7 @@ downloads results as CSV file:
      :yellow-green          0x9acd32
      })
 
-  (defn preset-rgb [id] (-> id colors col/int24 col/rgba))
+  (defn preset-rgb [id] (->> id colors col/int24 col/as-rgba))
 
   (defn preset-hsv [id] (->> id preset-rgb col/as-hsva))
 
