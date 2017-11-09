@@ -93,11 +93,14 @@ generator...
     "Takes a length n and 4 cosine coefficients (for colors usually 3 or
     4-element vectors) and produces vector of n new RGBA colors, with
     each of its elements defined by an AM & FM cosine wave and clamped
-    to the [0 1] interval."
+    to the [0 1] interval. The fn `t` is used to ramp the gradient and
+    remap the interpolation interval (e.g. use m/mix-circular)"
     ([n spec]
-     (apply cosine-gradient n spec))
-    ([n offset amp fmod phase]
-     (mapv #(cosine-gradient-color offset amp fmod phase %) (m/norm-range (dec n)))))
+     (apply cosine-gradient n m/mix* spec))
+    ([n t spec]
+     (apply cosine-gradient n t spec))
+    ([n t offset amp fmod phase]
+     (mapv #(cosine-gradient-color offset amp fmod phase (t 0 1 %)) (m/norm-range (dec n)))))
 #+END_SRC
 
 *** Example usage
