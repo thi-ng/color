@@ -5,6 +5,7 @@
      - [[#cosine-based-gradient-generation][Cosine based gradient generation]]
          - [[#presets][Presets]]
          - [[#implementation][Implementation]]
+         - [[#gradient-coefficient-calculation][Gradient coefficient calculation]]
          - [[#example-usage][Example usage]]
          - [[#gradient-presets-visualization][Gradient presets visualization]]
      - [[#complete-namespace-definition][Complete namespace definition]]
@@ -101,6 +102,30 @@ generator...
      (apply cosine-gradient n t spec))
     ([n t offset amp fmod phase]
      (mapv #(cosine-gradient-color offset amp fmod phase (t 0 1 %)) (m/norm-range (dec n)))))
+#+END_SRC
+
+*** Gradient coefficient calculation
+
+Based on [[https://gist.github.com/dimovich/bc52b77e2280ac56a2ed68a987d5ec57][@dimovich's gist]], this function computes the cosine gradient
+coefficients for a gradient between two given colors.
+
+#+BEGIN_SRC clojure :noweb-ref generators
+  (defn cosine-coefficients
+    "Computes coefficients defining a cosine gradient between
+    the two given colors. The colors can be in any color space,
+    but the resulting gradient will always be computed in RGB.
+
+    amp = (R1 - R2) / 2
+    dc = R1 - amp
+    freq = -0.5"
+    ([c1 c2]
+     (let [colors (map #(select-keys (col/as-rgba %) [:r :g :b]) [c1 c2])
+           amp    (apply mapv (fn [[_ v1] [_ v2]] (* 0.5 (- v1 v2))) colors)
+           offset (mapv (fn [[_ v1] a] (- v1 a)) (first colors) amp)]
+       [offset
+        amp
+        [-0.500 -0.500 -0.500]
+        [0.000 0.000 0.000]])))
 #+END_SRC
 
 *** Example usage
