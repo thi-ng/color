@@ -446,7 +446,7 @@
     (as-hsla
         [_]
       (let [l  (* (- 2 s) (* v 0.5))
-            s' (/ (* s v) (- 1 (m/abs* (dec (* 2 l)))))]
+            s' (if (zero? l) 0.0 (/ (* s v) (- 1 (m/abs* (dec (* 2 l))))))]
         (hsla h s' l a)))
     ICMYKConvert
     (as-cmyka
