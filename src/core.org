@@ -64,6 +64,7 @@
     (rotate-hue [_ theta])
     (adjust-saturation [_ offset])
     (adjust-brightness [_ offset])
+    (adjust-luminance [_ offset])
     (adjust-alpha [_ offset]))
 #+END_SRC
 
@@ -195,6 +196,8 @@
         [_ offset] (-> _ (as-hsva) (adjust-saturation offset) (as-rgba)))
     (adjust-brightness
         [_ offset] (-> _ (as-hsva) (adjust-brightness offset) (as-rgba)))
+    (adjust-luminance
+        [_ offset] (-> _ (as-hsla) (adjust-luminance offset) (as-rgba)))
     (adjust-alpha
         [_ offset] (RGBA. r g b (m/clamp (+ a offset) 0.0 1.0)))
     m/IInvert
@@ -302,6 +305,8 @@
         [_ offset] (-> _ (as-hsva) (adjust-saturation offset) (as-int24)))
     (adjust-brightness
         [_ offset] (-> _ (as-hsva) (adjust-brightness offset) (as-int24)))
+    (adjust-luminance
+        [_ offset] (-> _ (as-hsla) (adjust-luminance offset) (as-int24)))
     (adjust-alpha
         [_ offset] (adjust-alpha (as-int32 _) offset))
     m/IInvert
@@ -390,6 +395,8 @@
         [_ offset] (-> _ (as-hsva) (adjust-saturation offset) (as-int32)))
     (adjust-brightness
         [_ offset] (-> _ (as-hsva) (adjust-brightness offset) (as-int32)))
+    (adjust-luminance
+        [_ offset] (-> _ (as-hsla) (adjust-luminance offset) (as-int32)))
     (adjust-alpha
         [_ offset]
       (let [a (* INV8BIT (bit-and (unsigned-bit-shift-right col 24) 0xff))
@@ -496,6 +503,8 @@
         [_ offset] (HSVA. h (m/clamp (+ offset s) 0.0 1.0) v a))
     (adjust-brightness
         [_ offset] (HSVA. h s (m/clamp (+ offset v) 0.0 1.0) a))
+    (adjust-luminance
+        [_ offset] (-> _ (as-hsla) (adjust-luminance offset) (as-hsva)))
     (adjust-alpha
         [_ offset] (HSVA. h s v (m/clamp (+ offset a) 0.0 1.0)))
     m/IInvert
@@ -618,6 +627,8 @@
         [_ offset] (HSLA. h (m/clamp (+ offset s) 0.0 1.0) l a))
     (adjust-brightness
         [_ offset] (-> _ (as-hsva) (adjust-brightness offset) (as-hsla)))
+    (adjust-luminance
+        [_ offset] (HSLA. h s (m/clamp (+ offset l) 0.0 1.0) a))
     (adjust-alpha
         [_ offset] (HSLA. h s l (m/clamp (+ offset a) 0.0 1.0)))
     m/IInvert
@@ -731,6 +742,8 @@
         [_ offset] (-> _ (as-hsva) (adjust-saturation offset) (as-cmyka)))
     (adjust-brightness
         [_ offset] (-> _ (as-hsva) (adjust-brightness offset) (as-cmyka)))
+    (adjust-luminance
+        [_ offset] (-> _ (as-hsla) (adjust-luminance offset) (as-cmyka)))
     (adjust-alpha
         [_ offset] (CMYKA. c m y k (m/clamp (+ offset a) 0.0 1.0)))
     m/IInvert
@@ -823,6 +836,8 @@
         [_ offset] (-> _ (as-hsva) (adjust-saturation offset) (as-css)))
     (adjust-brightness
         [_ offset] (-> _ (as-hsva) (adjust-brightness offset) (as-css)))
+    (adjust-luminance
+        [_ offset] (-> _ (as-hsla) (adjust-luminance offset) (as-css)))
     (adjust-alpha
         [_ offset] (-> _ (as-rgba) (adjust-alpha offset) (as-css)))
     m/IInvert
@@ -905,6 +920,8 @@
             [_ offset] (-> col to-rgba (adjust-saturation offset) from-rgba ctor))
         (adjust-brightness
             [_ offset] (-> col to-rgba (adjust-brightness offset) from-rgba ctor))
+        (adjust-luminance
+            [_ offset] (-> col to-rgba (adjust-luminance offset) from-rgba ctor))
         m/IInvert
         (invert
             [_] (-> col to-rgba m/invert from-rgba ctor))
