@@ -921,9 +921,16 @@
 *** Constructors
 #+BEGIN_SRC clojure :noweb-ref ctors
   (defn rgba
-    ([[r g b a]] (RGBA. r g b (if a a 1.0)))
-    ([r g b] (RGBA. r g b 1.0))
-    ([r g b a] (RGBA. r g b a)))
+    ([rgba-coll]
+     (apply rgba rgba-coll))
+    ([r g b]
+     (rgba r g b 1.0))
+    ([r g b a]
+     (RGBA.
+      (m/clamp r 0.0 1.0)
+      (m/clamp g 0.0 1.0)
+      (m/clamp b 0.0 1.0)
+      (m/clamp a 0.0 1.0))))
 
   (defn int24
     [col] (Int24. (bit-and col 0xffffff)))
