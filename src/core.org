@@ -106,6 +106,7 @@
       (let [r (m/clamp r 0.0 1.0)
             g (m/clamp g 0.0 1.0)
             b (m/clamp b 0.0 1.0)
+            a (m/clamp a 0.0 1.0)
             f1 (min r g b)
             f2 (max r g b)
             l  (mm/addm f1 f2 0.5)
@@ -122,7 +123,7 @@
                      g (- (+ THIRD dr) db)
                      (- (+ TWO_THIRD dg) dr))
                 h  (if (neg? h) (inc h) (if (>= h 1.0) (dec h) h))]
-            (hsla h s l (m/clamp a 0.0 1.0))))))
+            (hsla h s l a)))))
     ICMYKConvert
     (as-cmyka
         [_]
