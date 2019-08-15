@@ -86,7 +86,10 @@
     IHSVConvert
     (as-hsva
         [_]
-      (let [v (max r g b)
+      (let [r (m/clamp r 0.0 1.0)
+            g (m/clamp g 0.0 1.0)
+            b (m/clamp b 0.0 1.0)
+            v (max r g b)
             d (- v (min r g b))
             s (if (m/delta= 0.0 v) 0.0 (/ d v))
             h (if (m/delta= 0.0 s)
@@ -96,11 +99,14 @@
                   g (+ 2.0 (mm/subdiv b r d))
                   (+ 4.0 (mm/subdiv r g d))))
             h (/ h 6.0)]
-        (hsva (if (neg? h) (inc h) h) s v a)))
+        (hsva (if (neg? h) (inc h) h) s v (m/clamp a 0.0 1.0))))
     IHSLConvert
     (as-hsla
         [_]
-      (let [f1 (min r g b)
+      (let [r (m/clamp r 0.0 1.0)
+            g (m/clamp g 0.0 1.0)
+            b (m/clamp b 0.0 1.0)
+            f1 (min r g b)
             f2 (max r g b)
             l  (mm/addm f1 f2 0.5)
             d  (- f2 f1)]
@@ -116,7 +122,7 @@
                      g (- (+ THIRD dr) db)
                      (- (+ TWO_THIRD dg) dr))
                 h  (if (neg? h) (inc h) (if (>= h 1.0) (dec h) h))]
-            (hsla h s l a)))))
+            (hsla h s l (m/clamp a 0.0 1.0))))))
     ICMYKConvert
     (as-cmyka
         [_]
