@@ -86,7 +86,10 @@
     IHSVConvert
     (as-hsva
         [_]
-      (let [v (max r g b)
+      (let [r (m/clamp r 0.0 1.0)
+            g (m/clamp g 0.0 1.0)
+            b (m/clamp b 0.0 1.0)
+            v (max r g b)
             d (- v (min r g b))
             s (if (m/delta= 0.0 v) 0.0 (/ d v))
             h (if (m/delta= 0.0 s)
@@ -96,11 +99,15 @@
                   g (+ 2.0 (mm/subdiv b r d))
                   (+ 4.0 (mm/subdiv r g d))))
             h (/ h 6.0)]
-        (hsva (if (neg? h) (inc h) h) s v a)))
+        (hsva (if (neg? h) (inc h) h) s v (m/clamp a 0.0 1.0))))
     IHSLConvert
     (as-hsla
         [_]
-      (let [f1 (min r g b)
+      (let [r (m/clamp r 0.0 1.0)
+            g (m/clamp g 0.0 1.0)
+            b (m/clamp b 0.0 1.0)
+            a (m/clamp a 0.0 1.0)
+            f1 (min r g b)
             f2 (max r g b)
             l  (mm/addm f1 f2 0.5)
             d  (- f2 f1)]
@@ -120,21 +127,23 @@
     ICMYKConvert
     (as-cmyka
         [_]
-      (let [c (- 1.0 r)
-            m (- 1.0 g)
-            y (- 1.0 b)
+      (let [c (- 1.0 (m/clamp r 0.0 1.0))
+            m (- 1.0 (m/clamp g 0.0 1.0))
+            y (- 1.0 (m/clamp b 0.0 1.0))
             k (min (min c m) y)]
         (cmyka
          (max (- c k) 0.0)
          (max (- m k) 0.0)
          (max (- y k) 0.0)
          (max k 0.0)
-         a)))
+         (m/clamp a 0.0 1.0))))
     ICSSConvert
     (as-css
         [_]
       (if (< a 1.0)
-        (let [r (* 0xff r) g (* 0xff g) b (* 0xff b)]
+        (let [r (* 0xff (m/clamp r 0.0 1.0))
+              g (* 0xff (m/clamp g 0.0 1.0))
+              b (* 0xff (m/clamp b 0.0 1.0))]
           (css (str "rgba(" (int r) \, (int g) \, (int b) \, (max 0.0 a) ")")))
         (as-css (as-int24 _))))
     IIntConvert
@@ -143,19 +152,19 @@
       (int24
        (bit-or
         (bit-or
-         (-> r (* 0xff) (+ 0.5) int (bit-shift-left 16))
-         (-> g (* 0xff) (+ 0.5) int (bit-shift-left 8)))
-        (-> b (* 0xff) (+ 0.5) int))))
+         (-> (m/clamp r 0.0 1.0) (* 0xff) (+ 0.5) int (bit-shift-left 16))
+         (-> (m/clamp g 0.0 1.0) (* 0xff) (+ 0.5) int (bit-shift-left 8)))
+        (-> (m/clamp b 0.0 1.0) (* 0xff) (+ 0.5) int))))
     (as-int32
         [_]
       (int32
        (bit-or
         (bit-or
          (bit-or
-          (-> r (* 0xff) (+ 0.5) int (bit-shift-left 16))
-          (-> g (* 0xff) (+ 0.5) int (bit-shift-left 8)))
-         (-> b (* 0xff) (+ 0.5) int))
-        (-> a (* 0xff) (+ 0.5) int (bit-shift-left 24)))))
+          (-> (m/clamp r 0.0 1.0) (* 0xff) (+ 0.5) int (bit-shift-left 16))
+          (-> (m/clamp g 0.0 1.0) (* 0xff) (+ 0.5) int (bit-shift-left 8)))
+         (-> (m/clamp b 0.0 1.0) (* 0xff) (+ 0.5) int))
+        (-> (m/clamp a 0.0 1.0) (* 0xff) (+ 0.5) int (bit-shift-left 24)))))
     IColorComponents
     (red [_] r)
     (green [_] g)
