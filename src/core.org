@@ -577,7 +577,7 @@
         [_]
       (let [l2 (* 2 l)
             v  (/ (+ l2 (* s (- 1 (m/abs* (dec l2))))) 2)
-            s' (/ (* 2 (- v l)) v)]
+            s' (if (zero? v) 0.0 (/ (* 2 (- v l)) v))]
         (HSVA. h s' v a)))
     IHSLConvert
     (as-hsla [_] _)
