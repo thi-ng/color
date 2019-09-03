@@ -61,11 +61,11 @@
     (black [_]))
 
   (defprotocol IColorOps
-    (rotate-hue [_ theta])
-    (adjust-saturation [_ offset])
-    (adjust-brightness [_ offset])
-    (adjust-luminance [_ offset])
-    (adjust-alpha [_ offset]))
+    (rotate-hue [_ theta] "Rotate hue by radians.")
+    (adjust-saturation [_ offset] "Adjust saturation up or down, clamping result to 0.0-1.0")
+    (adjust-brightness [_ offset] "Adjust brightness (per HSV norms) up or down, clamping result to 0.0-1.0")
+    (adjust-luminance [_ offset] "Adjust lightness (per HSL) up or down, clamping result to 0.0-1.0")
+    (adjust-alpha [_ offset] "Adjust alpha up or down, clamping result to 0.0-1.0"))
 #+END_SRC
 
 ** Color types & conversions
