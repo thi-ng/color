@@ -143,7 +143,7 @@ STABLE & under regular development, 170+ tests
 ** Injected properties                                             :noexport:
 
 #+BEGIN_SRC clojure :noweb-ref version
-1.3.0
+1.4.0
 #+END_SRC
 
 #+BEGIN_SRC clojure :exports none :noweb-ref project-url
@@ -166,7 +166,7 @@ target/color-<<version>>.js
 #+END_SRC
 **** [[https://github.com/thi-ng/math][thi.ng/math]]
 #+BEGIN_SRC clojure :noweb-ref dep-math
-[thi.ng/math "0.2.1"]
+[thi.ng/math "0.3.0"]
 #+END_SRC
 **** [[https://github.com/thi-ng/dstruct][thi.ng/dstruct]]
 #+BEGIN_SRC clojure :noweb-ref dep-dstruct
