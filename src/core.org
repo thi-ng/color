@@ -941,7 +941,10 @@
 *** Clojure print methods
 
 #+BEGIN_SRC clojure :noweb-ref printers
-  #?(:clj (prefer-method print-method clojure.lang.IRecord clojure.lang.IDeref))
+  #?(:clj (do (prefer-method print-method clojure.lang.IRecord clojure.lang.IDeref)
+              (prefer-method print-method clojure.lang.IPersistentMap clojure.lang.IDeref)
+              (prefer-method print-method java.util.Map clojure.lang.IDeref)
+              (prefer-method clojure.pprint/simple-dispatch clojure.lang.IPersistentMap clojure.lang.IDeref)))
 #+END_SRC
 
 *** Constructors
