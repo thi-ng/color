@@ -1163,7 +1163,7 @@
     [col]
     (if (= \# (first col))
       (hex->int col)
-      (let [[[_ mode a b c d]] (re-seq #"(rgb|hsl)a?\((\d+%?),(\d+%?),(\d+%?),?([0-9\.]+)?\)" col)]
+      (let [[[_ mode a b c d]] (re-seq #"(rgb|hsl)a?\((\d+%?),(\d+%?),(\d+%?),?([0-9\.]+)?\)" (str/replace col #"\s+" ""))]
         (if mode
           (if (#{"rgb" "rgba"} mode)
             (RGBA.
@@ -1284,6 +1284,7 @@
      [thi.ng.dstruct.streams :as streams]
      [thi.ng.strf.core :as f]
      [thi.ng.xerror.core :as err]
+     [clojure.string :as str]
      #?(:clj [thi.ng.math.macros :as mm]
         :cljs [thi.ng.typedarrays.core :as ta])))
 
