@@ -330,7 +330,7 @@ symbol =version= holding the version string defined above:
 
 | *Version* | *Released* | *Description*                                             | *Tagged GH URL* |
 |-----------+------------+-----------------------------------------------------------+-----------------|
-|     1.2.1 |        TBC | add opt gradient ramping                                  | [[https://github.com/thi-ng/color/tree/1.2.1][1.2.1]]           |
+|     1.5.0 | 2022-04-23 | update deps                                               | [[https://github.com/thi-ng/color/tree/1.5.0][1.5.0]]           |
 |     1.2.0 | 2016-04-05 | update dstruct dep, refactor IBuffer impls, add tests     | [[https://github.com/thi-ng/color/tree/1.2.0][1.2.0]]           |
 |     1.1.2 | 2016-03-28 | add gradient presets                                      | [[https://github.com/thi-ng/color/tree/1.1.2][1.1.2]]           |
 |     1.1.1 | 2016-03-19 | fix dependencies                                          | [[https://github.com/thi-ng/color/tree/1.1.1][1.1.1]]           |
