@@ -143,7 +143,7 @@ STABLE & under regular development, 170+ tests
 ** Injected properties                                             :noexport:
 
 #+BEGIN_SRC clojure :noweb-ref version
-1.4.0
+1.5.0
 #+END_SRC
 
 #+BEGIN_SRC clojure :exports none :noweb-ref project-url
@@ -158,28 +158,28 @@ target/color-<<version>>.js
 *** Runtime
 **** [[https://github.com/clojure/clojure][Clojure]]
 #+BEGIN_SRC clojure :noweb-ref dep-clj
-[org.clojure/clojure "1.9.0"]
+[org.clojure/clojure "1.11.1"]
 #+END_SRC
 **** [[https://github.com/clojure/clojurescript][ClojureScript]]
 #+BEGIN_SRC clojure :noweb-ref dep-cljs
-[org.clojure/clojurescript "1.10.339"]
+[org.clojure/clojurescript "1.11.4"]
 #+END_SRC
 **** [[https://github.com/thi-ng/math][thi.ng/math]]
 #+BEGIN_SRC clojure :noweb-ref dep-math
-[thi.ng/math "0.3.0"]
+[thi.ng/math "0.3.1"]
 #+END_SRC
 **** [[https://github.com/thi-ng/dstruct][thi.ng/dstruct]]
 #+BEGIN_SRC clojure :noweb-ref dep-dstruct
-[thi.ng/dstruct "0.2.0"]
+[thi.ng/dstruct "0.2.2"]
 #+END_SRC
 **** [[https://github.com/thi-ng/typedarrays/][thi.ng/typedarrays]]
 #+NAME: dep-arrays
 #+BEGIN_SRC clojure
-[thi.ng/typedarrays "0.1.3"]
+[thi.ng/typedarrays "0.1.7"]
 #+END_SRC
 **** [[https://github.com/thi-ng/strf][thi.ng/strf]]
 #+BEGIN_SRC clojure :noweb-ref dep-strf
-[thi.ng/strf "0.2.2"]
+[thi.ng/strf "0.2.3"]
 #+END_SRC
 **** [[https://github.com/thi-ng/xerror][thi.ng/xerror]]
 #+BEGIN_SRC clojure :noweb-ref dep-xerror
@@ -189,7 +189,7 @@ target/color-<<version>>.js
 *** Development
 **** [[https://github.com/hugoduncan/criterium][Criterium]]
 #+BEGIN_SRC clojure :noweb-ref dep-criterium
-[criterium "0.4.4"]
+[criterium "0.4.6"]
 #+END_SRC
 
 **** [[https://github.com/cemerick/clojurescript.test][clojurescript.test]]
@@ -199,7 +199,7 @@ target/color-<<version>>.js
 
 **** [[https://github.com/emezeske/lein-cljsbuild][Cljsbuild]]
 #+BEGIN_SRC clojure :noweb-ref dep-cljsbuild
-[lein-cljsbuild "1.1.7"]
+[lein-cljsbuild "1.1.8"]
 #+END_SRC
 
 ** Leiningen coordinates
@@ -288,8 +288,8 @@ in the REPL via =(require 'thi.ng.color... :reload)= or similar.
 
     :pom-addition [:developers [:developer
                                 [:name "Karsten Schmidt"]
-                                [:url "http://postspectacular.com"]
-                                [:timezone "0"]]])
+                                [:url "https://thi.ng"]
+                                [:timezone "1"]]])
 #+END_SRC
 
 ** ClojureScript HTML harness                                      :noexport:
@@ -349,7 +349,7 @@ symbol =version= holding the version string defined above:
 
 | *Name*          | *Role*                          | *Website*                                 |
 |-----------------+---------------------------------+-------------------------------------------|
-| [[mailto:k@thi.ng][Karsten Schmidt]] | initiator & principal developer | http://postspectacular.com, http://thi.ng |
+| [[mailto:k@thi.ng][Karsten Schmidt]] | initiator & principal developer | https://thi.ng |
 
 ** License
 
