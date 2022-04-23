@@ -1285,8 +1285,8 @@
      [thi.ng.strf.core :as f]
      [thi.ng.xerror.core :as err]
      [clojure.string :as str]
-     #?(:clj [thi.ng.math.macros :as mm]
-        :cljs [thi.ng.typedarrays.core :as ta])))
+     #?@(:clj [clojure.pprint [thi.ng.math.macros :as mm]]
+         :cljs [[thi.ng.typedarrays.core :as ta]])))
 
   (declare hsva hsla css int24 int32 cmyka hsl-hue parse-css)
 
