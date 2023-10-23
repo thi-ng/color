@@ -69,7 +69,7 @@ intented for geo mapping and other data visualization applications.
 ** Leiningen coordinates
 *** Stable
 #+BEGIN_SRC clojure
-[thi.ng/color "1.4.0"]
+[thi.ng/color "1.5.1"]
 #+END_SRC
 
 *Note:* This library relies on the new conditional reader syntax of
@@ -143,7 +143,7 @@ STABLE & under regular development, 170+ tests
 ** Injected properties                                             :noexport:
 
 #+BEGIN_SRC clojure :noweb-ref version
-1.5.0
+1.5.1
 #+END_SRC
 
 #+BEGIN_SRC clojure :exports none :noweb-ref project-url
@@ -162,11 +162,11 @@ target/color-<<version>>.js
 #+END_SRC
 **** [[https://github.com/clojure/clojurescript][ClojureScript]]
 #+BEGIN_SRC clojure :noweb-ref dep-cljs
-[org.clojure/clojurescript "1.11.4"]
+[org.clojure/clojurescript "1.11.121"]
 #+END_SRC
 **** [[https://github.com/thi-ng/math][thi.ng/math]]
 #+BEGIN_SRC clojure :noweb-ref dep-math
-[thi.ng/math "0.3.1"]
+[thi.ng/math "0.3.2"]
 #+END_SRC
 **** [[https://github.com/thi-ng/dstruct][thi.ng/dstruct]]
 #+BEGIN_SRC clojure :noweb-ref dep-dstruct
@@ -179,7 +179,7 @@ target/color-<<version>>.js
 #+END_SRC
 **** [[https://github.com/thi-ng/strf][thi.ng/strf]]
 #+BEGIN_SRC clojure :noweb-ref dep-strf
-[thi.ng/strf "0.2.3"]
+[thi.ng/strf "0.2.4"]
 #+END_SRC
 **** [[https://github.com/thi-ng/xerror][thi.ng/xerror]]
 #+BEGIN_SRC clojure :noweb-ref dep-xerror
