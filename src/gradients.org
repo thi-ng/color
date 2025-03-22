@@ -50,25 +50,25 @@ data visualization purposes:
 Diagrams of the presets showing their channel curves and resulting
 gradients (using 100 samples):
 
-| [[http://media.thi.ng/color/presets/rainbow1.svg]]            | [[http://media.thi.ng/color/presets/rainbow2.svg]]              |
+| [[https://raw.githubusercontent.com/thi-ng/color/refs/heads/master/assets/presets/rainbow1.svg]]            | [[https://raw.githubusercontent.com/thi-ng/color/refs/heads/master/assets/presets/rainbow2.svg]]              |
 | :rainbow1                                                 | :rainbow2                                                   |
-| [[http://media.thi.ng/color/presets/rainbow3.svg]]            | [[http://media.thi.ng/color/presets/rainbow4.svg]]              |
+| [[https://raw.githubusercontent.com/thi-ng/color/refs/heads/master/assets/presets/rainbow3.svg]]            | [[https://raw.githubusercontent.com/thi-ng/color/refs/heads/master/assets/presets/rainbow4.svg]]              |
 | :rainbow3                                                 | :rainbow4                                                   |
-| [[http://media.thi.ng/color/presets/yellow-magenta-cyan.svg]] | [[http://media.thi.ng/color/presets/orange-blue.svg]]           |
+| [[https://raw.githubusercontent.com/thi-ng/color/refs/heads/master/assets/presets/yellow-magenta-cyan.svg]] | [[https://raw.githubusercontent.com/thi-ng/color/refs/heads/master/assets/presets/orange-blue.svg]]           |
 | :yellow-magenta-cyan preset                               | :orange-blue                                                |
-| [[http://media.thi.ng/color/presets/green-magenta.svg]]       | [[http://media.thi.ng/color/presets/green-red.svg]]             |
+| [[https://raw.githubusercontent.com/thi-ng/color/refs/heads/master/assets/presets/green-magenta.svg]]       | [[https://raw.githubusercontent.com/thi-ng/color/refs/heads/master/assets/presets/green-red.svg]]             |
 | :green-magenta                                            | :green-red                                                  |
-| [[http://media.thi.ng/color/presets/green-cyan.svg]]          | [[http://media.thi.ng/color/presets/blue-cyan.svg]]             |
+| [[https://raw.githubusercontent.com/thi-ng/color/refs/heads/master/assets/presets/green-cyan.svg]]          | [[https://raw.githubusercontent.com/thi-ng/color/refs/heads/master/assets/presets/blue-cyan.svg]]             |
 | :green-cyan                                               | :blue-cyan                                                  |
-| [[http://media.thi.ng/color/presets/yellow-red.svg]]          | [[http://media.thi.ng/color/presets/red-blue.svg]]              |
+| [[https://raw.githubusercontent.com/thi-ng/color/refs/heads/master/assets/presets/yellow-red.svg]]          | [[https://raw.githubusercontent.com/thi-ng/color/refs/heads/master/assets/presets/red-blue.svg]]              |
 | :yellow-red                                               | :red-blue                                                   |
-| [[http://media.thi.ng/color/presets/yellow-green-blue.svg]]   | [[http://media.thi.ng/color/presets/blue-white-red.svg]]        |
+| [[https://raw.githubusercontent.com/thi-ng/color/refs/heads/master/assets/presets/yellow-green-blue.svg]]   | [[https://raw.githubusercontent.com/thi-ng/color/refs/heads/master/assets/presets/blue-white-red.svg]]        |
 | :yellow-green-blue                                        | :blue-white-red                                             |
-| [[http://media.thi.ng/color/presets/cyan-magenta.svg]]        | [[http://media.thi.ng/color/presets/yellow-purple-magenta.svg]] |
+| [[https://raw.githubusercontent.com/thi-ng/color/refs/heads/master/assets/presets/cyan-magenta.svg]]        | [[https://raw.githubusercontent.com/thi-ng/color/refs/heads/master/assets/presets/yellow-purple-magenta.svg]] |
 | :cyan-magenta                                             | :yellow-purple-magenta                                      |
-| [[http://media.thi.ng/color/presets/green-blue-orange.svg]]   | [[http://media.thi.ng/color/presets/orange-magenta-blue.svg]]   |
+| [[https://raw.githubusercontent.com/thi-ng/color/refs/heads/master/assets/presets/green-blue-orange.svg]]   | [[https://raw.githubusercontent.com/thi-ng/color/refs/heads/master/assets/presets/orange-magenta-blue.svg]]   |
 | :green-blue-orange                                        | :orange-magenta-blue                                        |
-| [[http://media.thi.ng/color/presets/blue-magenta-orange.svg]] | [[http://media.thi.ng/color/presets/magenta-green.svg]]         |
+| [[https://raw.githubusercontent.com/thi-ng/color/refs/heads/master/assets/presets/blue-magenta-orange.svg]] | [[https://raw.githubusercontent.com/thi-ng/color/refs/heads/master/assets/presets/magenta-green.svg]]         |
 | :blue-magenta-orange                                      | :magenta-green                                              |
 
 *** Implementation

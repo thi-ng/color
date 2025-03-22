@@ -1,7 +1,7 @@
 #+SETUPFILE: src/setup.org
 #+TITLE: thi.ng/color
 
-[[http://media.thi.ng/color/presets/rainbow1.svg]]
+[[https://raw.githubusercontent.com/thi-ng/color/refs/heads/master/assets/presets/rainbow1.svg]]
 
 * Contents                                                         :toc_3_gh:
  - [[#about-the-project][About the project]]
